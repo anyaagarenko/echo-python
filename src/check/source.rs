@@ -8,6 +8,7 @@ use crate::checker::Checker;
 use crate::diagnostic::Diagnostic;
 use crate::locator::Locator;
 use crate::noqa::NoqaIndex;
+use crate::settings::{self, Settings};
 
 pub(super) fn check_file(path: &Path) -> Result<Vec<Diagnostic>> {
     let source = std::fs::read_to_string(path)
@@ -19,8 +20,9 @@ pub fn check_source(path: &Path, source: &str) -> Result<Vec<Diagnostic>> {
     let module = parse_module(path, source)?;
     let locator = Locator::new(source);
     let noqa = NoqaIndex::from_source(source);
+    let settings = settings::load_for_path(path);
     let mut diagnostics = Vec::new();
-    visit_module(path, &locator, &noqa, module, &mut diagnostics);
+    visit_module(path, &locator, &noqa, &settings, module, &mut diagnostics);
     Ok(diagnostics)
 }
 
@@ -33,6 +35,7 @@ fn visit_module(
     path: &Path,
     locator: &Locator,
     noqa: &NoqaIndex,
+    settings: &Settings,
     module: ast::Suite,
     diagnostics: &mut Vec<Diagnostic>,
 ) {
@@ -40,6 +43,7 @@ fn visit_module(
         locator,
         noqa,
         path,
+        settings,
         diagnostics,
     };
     for stmt in module {

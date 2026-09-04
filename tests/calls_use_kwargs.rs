@@ -1,0 +1,68 @@
+use std::path::Path;
+
+use echo_python::{Diagnostic, RULE_CALLS_USE_KWARGS, check_source};
+
+fn lint(source: &str) -> Vec<Diagnostic> {
+    check_source(Path::new("t.py"), source).expect("lint")
+}
+
+#[test]
+fn single_positional_is_clean() {
+    assert!(lint("f(1)\n").is_empty());
+}
+
+#[test]
+fn kwargs_only_is_clean() {
+    assert!(lint("f(a=1, b=2)\n").is_empty());
+}
+
+#[test]
+fn two_positionals_are_reported() {
+    let diags = lint("f(1, 2)\n");
+    assert_eq!(1, diags.len());
+    assert_eq!(RULE_CALLS_USE_KWARGS, diags[0].code);
+}
+
+#[test]
+fn method_two_positionals_are_reported() {
+    assert_eq!(RULE_CALLS_USE_KWARGS, lint("obj.m(1, 2)\n")[0].code);
+}
+
+#[test]
+fn self_then_one_arg_is_clean() {
+    assert!(lint("Foo.m(self, x)\n").is_empty());
+}
+
+#[test]
+fn self_then_two_args_are_reported() {
+    assert_eq!(RULE_CALLS_USE_KWARGS, lint("Foo.m(self, x, y)\n")[0].code);
+}
+
+#[test]
+fn starred_with_one_positional_is_clean() {
+    assert!(lint("f(1, *xs)\n").is_empty());
+}
+
+#[test]
+fn noqa_suppresses() {
+    assert!(lint("f(1, 2)  # noqa: echo-calls-use-kwargs\n").is_empty());
+}
+
+#[test]
+fn ignore_from_pyproject() {
+    let root =
+        std::env::temp_dir().join(format!("echo-python-kwargs-ignore-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(&root).unwrap();
+    std::fs::write(
+        root.join("pyproject.toml"),
+        "[tool.echo-python.calls-use-kwargs]\nignore = [\"print\"]\n",
+    )
+    .unwrap();
+    let file = root.join("t.py");
+    let source = "print(1, 2)\n";
+    std::fs::write(&file, source).unwrap();
+    let diags = check_source(&file, source).expect("lint");
+    assert!(diags.is_empty());
+    let _ = std::fs::remove_dir_all(&root);
+}

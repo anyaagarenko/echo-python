@@ -19,6 +19,8 @@ clap = "4.6.6"
 rayon = "1.11.0"
 rustpython-ast = {features = ["visitor"], version = "0.4.0"}
 rustpython-parser = "0.4.0"
+serde = {features = ["derive"], version = "1.0.229"}
+toml = "1.1.5"
 walkdir = "2.5.0"
 
 [lib]
@@ -29,6 +31,7 @@ path = "src/lib.rs"
 all = {level = "deny", priority = -1}
 cargo = {level = "deny", priority = -1}
 missing_errors_doc = "allow"
+multiple_crate_versions = "allow"
 multiple_inherent_impl = "allow"
 nursery = {level = "deny", priority = -1}
 pedantic = {level = "deny", priority = -1}
