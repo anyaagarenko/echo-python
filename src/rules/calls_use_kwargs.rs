@@ -45,15 +45,22 @@ pub(crate) fn check(
 }
 
 fn is_ignored(settings: &Settings, func: &ast::Expr) -> bool {
-    callee_name(func).is_some_and(|name| {
-        DEFAULT_IGNORE.contains(&name) || settings.calls_use_kwargs.ignores(name)
-    })
+    let Some(path) = callee_path(func) else {
+        return false;
+    };
+    let short = path.rsplit('.').next().unwrap_or(path.as_str());
+    DEFAULT_IGNORE.contains(&short)
+        || settings.calls_use_kwargs.ignores(path.as_str())
+        || settings.calls_use_kwargs.ignores(short)
 }
 
-fn callee_name(func: &ast::Expr) -> Option<&str> {
+fn callee_path(func: &ast::Expr) -> Option<String> {
     match func {
-        ast::Expr::Name(name) => Some(name.id.as_str()),
-        ast::Expr::Attribute(attr) => Some(attr.attr.as_str()),
+        ast::Expr::Name(name) => Some(name.id.to_string()),
+        ast::Expr::Attribute(attr) => match callee_path(attr.value.as_ref()) {
+            Some(base) => Some(format!("{base}.{}", attr.attr.as_str())),
+            None => Some(attr.attr.to_string()),
+        },
         _ => None,
     }
 }
@@ -132,9 +139,96 @@ mod tests {
     }
 
     #[test]
-    fn callee_name_from_attribute() {
+    fn callee_path_from_attribute() {
         let call = call_from("obj.append(1, 2)\n");
-        assert_eq!(Some("append"), callee_name(&call.func));
+        assert_eq!(Some("obj.append".to_string()), callee_path(&call.func));
+    }
+
+    #[test]
+    fn callee_path_from_nested_attribute() {
+        let call = call_from("pytest.param(1, 2)\n");
+        assert_eq!(Some("pytest.param".to_string()), callee_path(&call.func));
+    }
+
+    #[test]
+    fn callee_path_falls_back_on_call_chain() {
+        let call = call_from("qs.filter(x=1).values_list(\"a\", \"b\")\n");
+        assert_eq!(Some("values_list".to_string()), callee_path(&call.func));
+    }
+
+    #[test]
+    fn short_ignore_still_matches_call_chain() {
+        let call = call_from("qs.filter(x=1).values_list(\"a\", \"b\")\n");
+        let settings = Settings {
+            enabled: HashSet::from([RULE_CALLS_USE_KWARGS.to_string()]),
+            calls_use_kwargs: CallsUseKwargsSettings {
+                ignore: HashSet::from(["values_list".to_string()]),
+            },
+        };
+        let locator = Locator::new("qs.filter(x=1).values_list(\"a\", \"b\")\n");
+        let noqa = NoqaIndex::from_source("qs.filter(x=1).values_list(\"a\", \"b\")\n");
+        let mut diagnostics = Vec::new();
+        check(
+            &locator,
+            &noqa,
+            Path::new("t.py"),
+            &settings,
+            &call,
+            &mut diagnostics,
+        );
+        assert!(diagnostics.is_empty());
+    }
+
+    #[test]
+    fn qualified_ignore_skips_only_matching_path() {
+        let settings = Settings {
+            enabled: HashSet::from([RULE_CALLS_USE_KWARGS.to_string()]),
+            calls_use_kwargs: CallsUseKwargsSettings {
+                ignore: HashSet::from(["pytest.param".to_string()]),
+            },
+        };
+        let pytest_param = call_from("pytest.param(1, 2)\n");
+        let other_param = call_from("other.param(1, 2)\n");
+        let bare_param = call_from("param(1, 2)\n");
+
+        let mut diagnostics = Vec::new();
+        let locator = Locator::new("pytest.param(1, 2)\n");
+        let noqa = NoqaIndex::from_source("pytest.param(1, 2)\n");
+        check(
+            &locator,
+            &noqa,
+            Path::new("t.py"),
+            &settings,
+            &pytest_param,
+            &mut diagnostics,
+        );
+        assert!(diagnostics.is_empty());
+
+        diagnostics.clear();
+        let locator = Locator::new("other.param(1, 2)\n");
+        let noqa = NoqaIndex::from_source("other.param(1, 2)\n");
+        check(
+            &locator,
+            &noqa,
+            Path::new("t.py"),
+            &settings,
+            &other_param,
+            &mut diagnostics,
+        );
+        assert_eq!(1, diagnostics.len());
+
+        diagnostics.clear();
+        let locator = Locator::new("param(1, 2)\n");
+        let noqa = NoqaIndex::from_source("param(1, 2)\n");
+        check(
+            &locator,
+            &noqa,
+            Path::new("t.py"),
+            &settings,
+            &bare_param,
+            &mut diagnostics,
+        );
+        assert_eq!(1, diagnostics.len());
     }
 
     #[test]

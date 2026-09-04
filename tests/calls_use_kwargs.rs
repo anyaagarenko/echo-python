@@ -95,6 +95,28 @@ fn ignore_from_pyproject() {
 }
 
 #[test]
+fn qualified_ignore_from_pyproject() {
+    let root = std::env::temp_dir().join(format!(
+        "echo-python-kwargs-qualified-ignore-{}",
+        std::process::id()
+    ));
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(&root).unwrap();
+    std::fs::write(
+        root.join("pyproject.toml"),
+        "[tool.echo-python.calls-use-kwargs]\nignore = [\"pytest.param\"]\n",
+    )
+    .unwrap();
+    let file = root.join("t.py");
+    let source = "pytest.param(1, 2, id=\"x\")\nother.param(1, 2)\n";
+    std::fs::write(&file, source).unwrap();
+    let diags = check_source(&file, source, &CheckOptions::default()).expect("lint");
+    assert_eq!(1, diags.len());
+    assert_eq!(RULE_CALLS_USE_KWARGS, diags[0].code);
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+#[test]
 fn lint_ignore_from_pyproject() {
     let root = std::env::temp_dir().join(format!("echo-python-lint-ignore-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&root);
