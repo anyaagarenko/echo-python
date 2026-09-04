@@ -19,7 +19,7 @@ pub(super) fn parse_noqa(line: &str) -> Option<HashSet<String>> {
         .split(|c: char| c == ',' || c.is_whitespace())
         .map(str::trim)
         .filter(|part| !part.is_empty())
-        .map(str::to_ascii_lowercase)
+        .map(str::to_ascii_uppercase)
         .collect();
 
     Some(codes)
@@ -45,9 +45,9 @@ mod tests {
 
     #[test]
     fn parses_codes_after_colon() {
-        let codes = parse_noqa("x = 1  # noqa: foo, bar").unwrap();
-        assert!(codes.contains("foo"));
-        assert!(codes.contains("bar"));
+        let codes = parse_noqa("x = 1  # noqa: FOO, BAR").unwrap();
+        assert!(codes.contains("FOO"));
+        assert!(codes.contains("BAR"));
     }
 
     #[test]

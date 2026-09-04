@@ -7,6 +7,18 @@ use crate::locator::Locator;
 use crate::noqa::NoqaIndex;
 use crate::settings::Settings;
 
+const DEFAULT_IGNORE: &[&str] = &[
+    "getattr",
+    "hasattr",
+    "isinstance",
+    "issubclass",
+    "max",
+    "min",
+    "path",
+    "setattr",
+    "zip",
+];
+
 pub(crate) fn check(
     locator: &Locator,
     noqa: &NoqaIndex,
@@ -33,7 +45,9 @@ pub(crate) fn check(
 }
 
 fn is_ignored(settings: &Settings, func: &ast::Expr) -> bool {
-    callee_name(func).is_some_and(|name| settings.calls_use_kwargs.ignores(name))
+    callee_name(func).is_some_and(|name| {
+        DEFAULT_IGNORE.contains(&name) || settings.calls_use_kwargs.ignores(name)
+    })
 }
 
 fn callee_name(func: &ast::Expr) -> Option<&str> {
@@ -70,6 +84,7 @@ const fn is_starred(expr: &ast::Expr) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::settings::CallsUseKwargsSettings;
     use rustpython_parser::Parse;
     use rustpython_parser::ast::Suite;
     use std::collections::HashSet;
@@ -123,9 +138,31 @@ mod tests {
     }
 
     #[test]
+    fn isinstance_is_ignored_by_default() {
+        let call = call_from("isinstance(1, int)\n");
+        let settings = Settings {
+            enabled: HashSet::from([RULE_CALLS_USE_KWARGS.to_string()]),
+            calls_use_kwargs: CallsUseKwargsSettings::default(),
+        };
+        let locator = Locator::new("isinstance(1, int)\n");
+        let noqa = NoqaIndex::from_source("isinstance(1, int)\n");
+        let mut diagnostics = Vec::new();
+        check(
+            &locator,
+            &noqa,
+            Path::new("t.py"),
+            &settings,
+            &call,
+            &mut diagnostics,
+        );
+        assert!(diagnostics.is_empty());
+    }
+
+    #[test]
     fn ignore_skips_check() {
         let call = call_from("print(1, 2)\n");
         let settings = Settings {
+            enabled: HashSet::from([RULE_CALLS_USE_KWARGS.to_string()]),
             calls_use_kwargs: crate::settings::CallsUseKwargsSettings {
                 ignore: HashSet::from(["print".to_string()]),
             },

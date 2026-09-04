@@ -1,9 +1,9 @@
 use std::path::Path;
 
-use echo_python::{Diagnostic, RULE_WORDS_LIST_SORTED, check_source};
+use echo_python::{CheckOptions, Diagnostic, RULE_WORDS_LIST_SORTED, check_source};
 
 fn lint(source: &str) -> Vec<Diagnostic> {
-    check_source(Path::new("t.py"), source).expect("lint")
+    check_source(Path::new("t.py"), source, &CheckOptions::default()).expect("lint")
 }
 
 #[test]
@@ -30,5 +30,5 @@ fn unsorted_names_are_reported() {
 
 #[test]
 fn noqa_suppresses() {
-    assert!(lint("x = [\"b\", \"a\"]  # noqa: echo-words-list-sorted\n").is_empty());
+    assert!(lint("x = [\"b\", \"a\"]  # noqa: ECHO004\n").is_empty());
 }

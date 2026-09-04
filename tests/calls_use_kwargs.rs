@@ -1,9 +1,13 @@
 use std::path::Path;
 
-use echo_python::{Diagnostic, RULE_CALLS_USE_KWARGS, check_source};
+use echo_python::{CheckOptions, Diagnostic, RULE_CALLS_USE_KWARGS, check_source};
 
 fn lint(source: &str) -> Vec<Diagnostic> {
-    check_source(Path::new("t.py"), source).expect("lint")
+    check_source(Path::new("t.py"), source, &CheckOptions::default()).expect("lint")
+}
+
+fn lint_with(source: &str, options: &CheckOptions) -> Vec<Diagnostic> {
+    check_source(Path::new("t.py"), source, options).expect("lint")
 }
 
 #[test]
@@ -45,7 +49,30 @@ fn starred_with_one_positional_is_clean() {
 
 #[test]
 fn noqa_suppresses() {
-    assert!(lint("f(1, 2)  # noqa: echo-calls-use-kwargs\n").is_empty());
+    assert!(lint("f(1, 2)  # noqa: ECHO001\n").is_empty());
+}
+
+#[test]
+fn isinstance_is_clean() {
+    assert!(lint("isinstance(1, int)\n").is_empty());
+}
+
+#[test]
+fn select_only_other_rule_skips() {
+    let options = CheckOptions {
+        select: Some(vec!["ECHO003".into()]),
+        ..CheckOptions::default()
+    };
+    assert!(lint_with("f(1, 2)\n", &options).is_empty());
+}
+
+#[test]
+fn ignore_rule_skips() {
+    let options = CheckOptions {
+        ignore: vec!["ECHO001".into()],
+        ..CheckOptions::default()
+    };
+    assert!(lint_with("f(1, 2)\n", &options).is_empty());
 }
 
 #[test]
@@ -62,7 +89,25 @@ fn ignore_from_pyproject() {
     let file = root.join("t.py");
     let source = "print(1, 2)\n";
     std::fs::write(&file, source).unwrap();
-    let diags = check_source(&file, source).expect("lint");
+    let diags = check_source(&file, source, &CheckOptions::default()).expect("lint");
+    assert!(diags.is_empty());
+    let _ = std::fs::remove_dir_all(&root);
+}
+
+#[test]
+fn lint_ignore_from_pyproject() {
+    let root = std::env::temp_dir().join(format!("echo-python-lint-ignore-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&root);
+    std::fs::create_dir_all(&root).unwrap();
+    std::fs::write(
+        root.join("pyproject.toml"),
+        "[tool.echo-python.lint]\nignore = [\"ECHO001\"]\n",
+    )
+    .unwrap();
+    let file = root.join("t.py");
+    let source = "f(1, 2)\n";
+    std::fs::write(&file, source).unwrap();
+    let diags = check_source(&file, source, &CheckOptions::default()).expect("lint");
     assert!(diags.is_empty());
     let _ = std::fs::remove_dir_all(&root);
 }

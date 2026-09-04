@@ -1,9 +1,9 @@
 use std::path::Path;
 
-use echo_python::{Diagnostic, RULE_NUMBERS_LIST_SORTED, check_source};
+use echo_python::{CheckOptions, Diagnostic, RULE_NUMBERS_LIST_SORTED, check_source};
 
 fn lint(source: &str) -> Vec<Diagnostic> {
-    check_source(Path::new("t.py"), source).expect("lint")
+    check_source(Path::new("t.py"), source, &CheckOptions::default()).expect("lint")
 }
 
 #[test]
@@ -25,10 +25,10 @@ fn unsorted_numbers_are_reported() {
 
 #[test]
 fn noqa_suppresses() {
-    assert!(lint("x = [2, 1]  # noqa: echo-numbers-list-sorted\n").is_empty());
+    assert!(lint("x = [2, 1]  # noqa: ECHO003\n").is_empty());
 }
 
 #[test]
 fn other_noqa_does_not_suppress() {
-    assert!(!lint("x = [2, 1]  # noqa: echo-words-list-sorted\n").is_empty());
+    assert!(!lint("x = [2, 1]  # noqa: ECHO004\n").is_empty());
 }

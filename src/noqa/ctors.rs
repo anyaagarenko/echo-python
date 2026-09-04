@@ -28,9 +28,9 @@ mod tests {
 
     #[test]
     fn indexes_specific_codes() {
-        let index = NoqaIndex::from_source("x = 1  # noqa: echo-numbers-list-sorted, other\n");
-        assert!(index.lines[&1].contains("echo-numbers-list-sorted"));
-        assert!(index.lines[&1].contains("other"));
+        let index = NoqaIndex::from_source("x = 1  # noqa: ECHO003, other\n");
+        assert!(index.lines[&1].contains("ECHO003"));
+        assert!(index.lines[&1].contains("OTHER"));
     }
 
     #[test]

@@ -7,11 +7,14 @@ use super::CheckResult;
 use super::source::check_file;
 use super::walk::collect_python_files;
 use crate::diagnostic::Diagnostic;
+use crate::settings::CheckOptions;
 
-pub fn check_paths(paths: &[PathBuf]) -> Result<CheckResult> {
+pub fn check_paths(paths: &[PathBuf], options: &CheckOptions) -> Result<CheckResult> {
     let files = collect_python_files(paths)?;
-    let chunks: Vec<Result<Vec<Diagnostic>>> =
-        files.par_iter().map(|path| check_file(path)).collect();
+    let chunks: Vec<Result<Vec<Diagnostic>>> = files
+        .par_iter()
+        .map(|path| check_file(path, options))
+        .collect();
 
     let mut diagnostics = Vec::new();
     for chunk in chunks {
@@ -22,8 +25,8 @@ pub fn check_paths(paths: &[PathBuf]) -> Result<CheckResult> {
     Ok(CheckResult { diagnostics })
 }
 
-pub fn check_path(path: impl AsRef<Path>) -> Result<CheckResult> {
-    check_paths(&[path.as_ref().to_path_buf()])
+pub fn check_path(path: impl AsRef<Path>, options: &CheckOptions) -> Result<CheckResult> {
+    check_paths(&[path.as_ref().to_path_buf()], options)
 }
 
 fn sort_diagnostics(diagnostics: &mut [Diagnostic]) {

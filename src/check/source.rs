@@ -8,19 +8,19 @@ use crate::checker::Checker;
 use crate::diagnostic::Diagnostic;
 use crate::locator::Locator;
 use crate::noqa::NoqaIndex;
-use crate::settings::{self, Settings};
+use crate::settings::{self, CheckOptions, Settings};
 
-pub(super) fn check_file(path: &Path) -> Result<Vec<Diagnostic>> {
+pub(super) fn check_file(path: &Path, options: &CheckOptions) -> Result<Vec<Diagnostic>> {
     let source = std::fs::read_to_string(path)
         .with_context(|| format!("failed to read {}", path.display()))?;
-    check_source(path, &source)
+    check_source(path, &source, options)
 }
 
-pub fn check_source(path: &Path, source: &str) -> Result<Vec<Diagnostic>> {
+pub fn check_source(path: &Path, source: &str, options: &CheckOptions) -> Result<Vec<Diagnostic>> {
     let module = parse_module(path, source)?;
     let locator = Locator::new(source);
     let noqa = NoqaIndex::from_source(source);
-    let settings = settings::load_for_path(path);
+    let settings = settings::load_for_path(path, options);
     let mut diagnostics = Vec::new();
     visit_module(path, &locator, &noqa, &settings, module, &mut diagnostics);
     Ok(diagnostics)

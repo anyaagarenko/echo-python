@@ -1,9 +1,9 @@
 use std::path::Path;
 
-use echo_python::{Diagnostic, RULE_MIXED_LIST_SORTED, check_source};
+use echo_python::{CheckOptions, Diagnostic, RULE_MIXED_LIST_SORTED, check_source};
 
 fn lint(source: &str) -> Vec<Diagnostic> {
-    check_source(Path::new("t.py"), source).expect("lint")
+    check_source(Path::new("t.py"), source, &CheckOptions::default()).expect("lint")
 }
 
 #[test]
@@ -43,5 +43,5 @@ fn complex_expressions_are_skipped() {
 
 #[test]
 fn noqa_suppresses() {
-    assert!(lint("x = [\"a\", 1]  # noqa: echo-mixed-list-sorted\n").is_empty());
+    assert!(lint("x = [\"a\", 1]  # noqa: ECHO002\n").is_empty());
 }

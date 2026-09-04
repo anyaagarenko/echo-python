@@ -1,9 +1,10 @@
-use echo_python::check_source;
+use echo_python::{CheckOptions, check_source};
 use std::path::Path;
 
 #[test]
 fn reports_line_and_column() {
-    let diags = check_source(Path::new("t.py"), "x = [2, 1]\n").expect("lint");
+    let diags =
+        check_source(Path::new("t.py"), "x = [2, 1]\n", &CheckOptions::default()).expect("lint");
     assert_eq!(1, diags.len());
     assert_eq!(1, diags[0].row);
     assert_eq!(5, diags[0].column);
