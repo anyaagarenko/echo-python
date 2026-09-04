@@ -1,13 +1,15 @@
+tomls = Cargo.toml mise.toml pyproject.toml rustfmt.toml
+
 fmt:
 	cargo fmt
 	cargo clippy --all-targets --fix --allow-dirty --allow-staged -- --deny warnings
-	mise exec -- toml-sort pyproject.toml
+	mise exec -- toml-sort $(tomls)
 	make sort-dotfiles
 
 check:
 	cargo fmt -- --check
 	cargo clippy --all-targets -- --deny warnings
-	mise exec -- toml-sort pyproject.toml --check
+	mise exec -- toml-sort $(tomls) --check
 
 test:
 	cargo test
