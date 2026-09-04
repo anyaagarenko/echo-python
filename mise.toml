@@ -1,0 +1,2 @@
+[tools]
+"pipx:toml-sort" = "0.24.2"
