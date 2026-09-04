@@ -6,7 +6,7 @@ mod locator;
 mod noqa;
 mod rules;
 
-pub use check::{check_path, check_paths, check_source, CheckResult};
+pub use check::{CheckResult, check_path, check_paths, check_source};
 pub use diagnostic::Diagnostic;
 
 pub const RULE_MIXED_LIST_SORTED: &str = "echo-mixed-list-sorted";

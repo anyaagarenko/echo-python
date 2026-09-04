@@ -1,12 +1,12 @@
 use rustpython_parser::ast;
 
+use crate::RULE_MIXED_LIST_SORTED;
 use crate::diagnostic::Diagnostic;
 use crate::locator::Locator;
 use crate::noqa::NoqaIndex;
-use crate::RULE_MIXED_LIST_SORTED;
 
 use crate::common::report::report;
-use crate::common::sort_key::{cmp_numbers, cmp_words, keys_match_mixed_order, sort_key, SortKey};
+use crate::common::sort_key::{SortKey, cmp_numbers, cmp_words, keys_match_mixed_order, sort_key};
 
 pub fn check(
     locator: &Locator,

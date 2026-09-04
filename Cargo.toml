@@ -1,7 +1,7 @@
 [package]
 categories = ["command-line-utilities", "development-tools"]
 description = "A fast Python linter with custom rules"
-edition = "2021"
+edition = "2024"
 keywords = ["cli", "linter", "python", "rust"]
 license = "MIT"
 name = "echo-python"

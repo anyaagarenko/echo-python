@@ -1,9 +1,9 @@
 use std::path::{Path, PathBuf};
 
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use rayon::prelude::*;
-use rustpython_parser::ast::{self, Visitor};
 use rustpython_parser::Parse;
+use rustpython_parser::ast::{self, Visitor};
 use walkdir::WalkDir;
 
 use crate::checker::Checker;

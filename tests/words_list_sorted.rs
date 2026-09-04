@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use echo_python::{check_source, Diagnostic, RULE_WORDS_LIST_SORTED};
+use echo_python::{Diagnostic, RULE_WORDS_LIST_SORTED, check_source};
 
 fn lint(source: &str) -> Vec<Diagnostic> {
     check_source(Path::new("t.py"), source).expect("lint")
