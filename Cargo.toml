@@ -29,8 +29,10 @@ path = "src/lib.rs"
 all = {level = "deny", priority = -1}
 cargo = {level = "deny", priority = -1}
 missing_errors_doc = "allow"
+multiple_inherent_impl = "allow"
 nursery = {level = "deny", priority = -1}
 pedantic = {level = "deny", priority = -1}
+redundant_pub_crate = "allow"
 
 [lints.rust]
 unsafe_code = "forbid"

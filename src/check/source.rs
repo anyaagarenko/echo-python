@@ -1,0 +1,48 @@
+use std::path::Path;
+
+use anyhow::{Context, Result};
+use rustpython_parser::Parse;
+use rustpython_parser::ast::{self, Visitor};
+
+use crate::checker::Checker;
+use crate::diagnostic::Diagnostic;
+use crate::locator::Locator;
+use crate::noqa::NoqaIndex;
+
+pub(super) fn check_file(path: &Path) -> Result<Vec<Diagnostic>> {
+    let source = std::fs::read_to_string(path)
+        .with_context(|| format!("failed to read {}", path.display()))?;
+    check_source(path, &source)
+}
+
+pub fn check_source(path: &Path, source: &str) -> Result<Vec<Diagnostic>> {
+    let module = parse_module(path, source)?;
+    let locator = Locator::new(source);
+    let noqa = NoqaIndex::from_source(source);
+    let mut diagnostics = Vec::new();
+    visit_module(path, &locator, &noqa, module, &mut diagnostics);
+    Ok(diagnostics)
+}
+
+fn parse_module(path: &Path, source: &str) -> Result<ast::Suite> {
+    ast::Suite::parse(source, &path.display().to_string())
+        .map_err(|err| anyhow::anyhow!("{}: parse error: {err}", path.display()))
+}
+
+fn visit_module(
+    path: &Path,
+    locator: &Locator,
+    noqa: &NoqaIndex,
+    module: ast::Suite,
+    diagnostics: &mut Vec<Diagnostic>,
+) {
+    let mut checker = Checker {
+        locator,
+        noqa,
+        path,
+        diagnostics,
+    };
+    for stmt in module {
+        checker.visit_stmt(stmt);
+    }
+}

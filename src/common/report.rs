@@ -4,7 +4,7 @@ use crate::diagnostic::Diagnostic;
 use crate::locator::Locator;
 use crate::noqa::NoqaIndex;
 
-pub fn report(
+pub(crate) fn report(
     locator: &Locator,
     noqa: &NoqaIndex,
     path: &std::path::Path,

@@ -1,29 +1,6 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
-#[derive(Debug, Default)]
-pub struct NoqaIndex {
-    lines: HashMap<usize, HashSet<String>>,
-}
-
-impl NoqaIndex {
-    pub fn from_source(source: &str) -> Self {
-        let mut lines = HashMap::new();
-        for (idx, line) in source.lines().enumerate() {
-            if let Some(codes) = parse_noqa(line) {
-                lines.insert(idx + 1, codes);
-            }
-        }
-        Self { lines }
-    }
-
-    pub fn suppresses(&self, line: usize, code: &str) -> bool {
-        self.lines
-            .get(&line)
-            .is_some_and(|codes| codes.is_empty() || codes.contains(code))
-    }
-}
-
-fn parse_noqa(line: &str) -> Option<HashSet<String>> {
+pub(super) fn parse_noqa(line: &str) -> Option<HashSet<String>> {
     let hash = line.find('#')?;
     let comment = line[hash + 1..].trim_start();
     let rest = strip_noqa_prefix(comment)?;
@@ -53,5 +30,28 @@ fn strip_noqa_prefix(comment: &str) -> Option<&str> {
         Some(&comment[4..])
     } else {
         None
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parses_bare_noqa() {
+        let codes = parse_noqa("x = 1  # noqa").unwrap();
+        assert!(codes.is_empty());
+    }
+
+    #[test]
+    fn parses_codes_after_colon() {
+        let codes = parse_noqa("x = 1  # noqa: foo, bar").unwrap();
+        assert!(codes.contains("foo"));
+        assert!(codes.contains("bar"));
+    }
+
+    #[test]
+    fn rejects_non_noqa_comment() {
+        assert!(parse_noqa("x = 1  # hello").is_none());
     }
 }

@@ -1,2 +1,2 @@
-pub mod report;
-pub mod sort_key;
+pub(crate) mod report;
+pub(crate) mod sort_key;

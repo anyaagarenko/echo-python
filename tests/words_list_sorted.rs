@@ -14,14 +14,18 @@ fn sorted_strings_are_clean() {
 #[test]
 fn unsorted_strings_are_reported() {
     let diags = lint("x = [\"b\", \"a\"]\n");
-    assert_eq!(diags.len(), 1);
-    assert_eq!(diags[0].code, RULE_WORDS_LIST_SORTED);
+    assert_eq!(1, diags.len());
+    assert_eq!(RULE_WORDS_LIST_SORTED, diags[0].code);
 }
 
 #[test]
-fn names_are_sorted_as_words() {
+fn sorted_names_are_clean() {
     assert!(lint("x = [a, b]\n").is_empty());
-    assert_eq!(lint("x = [b, a]\n")[0].code, RULE_WORDS_LIST_SORTED);
+}
+
+#[test]
+fn unsorted_names_are_reported() {
+    assert_eq!(RULE_WORDS_LIST_SORTED, lint("x = [b, a]\n")[0].code);
 }
 
 #[test]
