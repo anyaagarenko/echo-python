@@ -16,5 +16,4 @@ ignore a finding:
   x = ["a", 1]  # noqa: echo-mixed-list-sorted
 
 development (hack on the linter itself):
-  cargo run -- check .
-  cargo run -- check path/to/file.py
+  see Makefile
