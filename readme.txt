@@ -10,9 +10,9 @@ cli:
 
   mise exec -- echo-python check .
   mise exec -- echo-python check path/to/file.py
-  mise exec -- echo-python check --extend-select ECHO002 .
+  mise exec -- echo-python check --extend-select ECHO001 .
   mise exec -- echo-python check --ignore ECHO001 .
-  mise exec -- echo-python check --select ECHO003 .
+  mise exec -- echo-python check --select ECHO001 .
 
 
 rules:
