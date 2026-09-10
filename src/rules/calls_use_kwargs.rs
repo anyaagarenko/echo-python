@@ -57,10 +57,10 @@ fn is_ignored(settings: &Settings, func: &ast::Expr) -> bool {
 fn callee_path(func: &ast::Expr) -> Option<String> {
     match func {
         ast::Expr::Name(name) => Some(name.id.to_string()),
-        ast::Expr::Attribute(attr) => match callee_path(attr.value.as_ref()) {
-            Some(base) => Some(format!("{base}.{}", attr.attr.as_str())),
-            None => Some(attr.attr.to_string()),
-        },
+        ast::Expr::Attribute(attr) => Some(callee_path(attr.value.as_ref()).map_or_else(
+            || attr.attr.to_string(),
+            |base| format!("{base}.{}", attr.attr.as_str()),
+        )),
         _ => None,
     }
 }

@@ -1,30 +1,3 @@
-[project]
-classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Environment :: Console",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python",
-    "Programming Language :: Rust",
-    "Topic :: Software Development :: Quality Assurance",
-]
-description = "A fast Python linter with custom rules"
-keywords = ["linter", "python", "rust"]
-license = "MIT"
-name = "echo-python"
-readme = "readme.txt"
-requires-python = ">=3.8"
-urls = {Repository = "https://github.com/anyaagarenko/echo-python"}
-version = "0.1.0"
-
-[build-system]
-build-backend = "maturin"
-requires = ["maturin>=1.7,<2.0"]
-
-[tool.maturin]
-bindings = "bin"
-strip = true
-
 [tool.tomlsort]
 all = true
 in_place = true
