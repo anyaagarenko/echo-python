@@ -1,0 +1,42 @@
+[package]
+categories = ["command-line-utilities", "development-tools"]
+description = "A fast Python linter with custom rules"
+edition = "2024"
+keywords = ["cli", "linter", "python", "rust"]
+license = "MIT"
+name = "echo-python"
+readme = "readme.txt"
+repository = "https://github.com/anyaagarenko/echo-python"
+version = "0.1.0"
+
+[[bin]]
+name = "echo-python"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = "1.0.104"
+clap = "4.6.6"
+rayon = "1.11.0"
+rustpython-ast = {features = ["visitor"], version = "0.4.0"}
+rustpython-parser = "0.4.0"
+serde = {features = ["derive"], version = "1.0.229"}
+toml = "1.1.5"
+walkdir = "2.5.0"
+
+[lib]
+name = "echo_python"
+path = "src/lib.rs"
+
+[lints.clippy]
+all = {level = "deny", priority = -1}
+cargo = {level = "deny", priority = -1}
+missing_errors_doc = "allow"
+multiple_crate_versions = "allow"
+multiple_inherent_impl = "allow"
+nursery = {level = "deny", priority = -1}
+pedantic = {level = "deny", priority = -1}
+redundant_pub_crate = "allow"
+
+[lints.rust]
+unsafe_code = "forbid"
+warnings = "deny"
