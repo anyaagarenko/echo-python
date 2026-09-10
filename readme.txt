@@ -8,8 +8,8 @@ install in a project:
 
 use as:
 
-  echo-python check .
-  echo-python check path/to/file.py
+  mise exec -- echo-python check .
+  mise exec -- echo-python check path/to/file.py
 
 
 rules:
@@ -23,9 +23,9 @@ rules:
 
 cli:
 
-  echo-python check --select ECHO003 .
-  echo-python check --ignore ECHO001 .
-  echo-python check --extend-select ECHO002 .
+  mise exec -- echo-python check --select ECHO003 .
+  mise exec -- echo-python check --ignore ECHO001 .
+  mise exec -- echo-python check --extend-select ECHO002 .
 
 
 configure in pyproject.toml:
