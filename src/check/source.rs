@@ -4,6 +4,7 @@ use anyhow::{Context, Result};
 use rustpython_parser::Parse;
 use rustpython_parser::ast::{self, Visitor};
 
+use crate::bindings::Bindings;
 use crate::checker::Checker;
 use crate::diagnostic::Diagnostic;
 use crate::locator::Locator;
@@ -21,8 +22,17 @@ pub fn check_source(path: &Path, source: &str, options: &CheckOptions) -> Result
     let locator = Locator::new(source);
     let noqa = NoqaIndex::from_source(source);
     let settings = settings::load_for_path(path, options);
+    let bindings = Bindings::from_module(&module);
     let mut diagnostics = Vec::new();
-    visit_module(path, &locator, &noqa, &settings, module, &mut diagnostics);
+    visit_module(
+        path,
+        &bindings,
+        &locator,
+        &noqa,
+        &settings,
+        module,
+        &mut diagnostics,
+    );
     Ok(diagnostics)
 }
 
@@ -33,6 +43,7 @@ fn parse_module(path: &Path, source: &str) -> Result<ast::Suite> {
 
 fn visit_module(
     path: &Path,
+    bindings: &Bindings,
     locator: &Locator,
     noqa: &NoqaIndex,
     settings: &Settings,
@@ -40,11 +51,12 @@ fn visit_module(
     diagnostics: &mut Vec<Diagnostic>,
 ) {
     let mut checker = Checker {
+        bindings,
+        diagnostics,
         locator,
         noqa,
         path,
         settings,
-        diagnostics,
     };
     for stmt in module {
         checker.visit_stmt(stmt);

@@ -28,6 +28,7 @@ impl Visitor for Checker<'_> {
     fn visit_expr_call(&mut self, node: ast::ExprCall) {
         if self.settings.is_enabled(RULE_CALLS_USE_KWARGS) {
             calls_use_kwargs::check(
+                self.bindings,
                 self.locator,
                 self.noqa,
                 self.path,

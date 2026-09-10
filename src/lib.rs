@@ -1,3 +1,4 @@
+mod bindings;
 mod check;
 mod checker;
 mod common;

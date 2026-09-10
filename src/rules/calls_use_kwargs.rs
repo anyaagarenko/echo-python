@@ -1,6 +1,7 @@
 use rustpython_parser::ast;
 
 use crate::RULE_CALLS_USE_KWARGS;
+use crate::bindings::Bindings;
 use crate::common::report::report;
 use crate::diagnostic::Diagnostic;
 use crate::locator::Locator;
@@ -20,6 +21,7 @@ const DEFAULT_IGNORE: &[&str] = &[
 ];
 
 pub(crate) fn check(
+    bindings: &Bindings,
     locator: &Locator,
     noqa: &NoqaIndex,
     path: &std::path::Path,
@@ -28,6 +30,9 @@ pub(crate) fn check(
     diagnostics: &mut Vec<Diagnostic>,
 ) {
     if is_ignored(settings, &expr.func) {
+        return;
+    }
+    if is_positional_only_dict_method(bindings, expr) {
         return;
     }
     if countable_positionals(&expr.args) <= 1 {
@@ -42,6 +47,14 @@ pub(crate) fn check(
         "use keyword arguments for calls with multiple positional args",
         diagnostics,
     );
+}
+
+fn is_positional_only_dict_method(bindings: &Bindings, expr: &ast::ExprCall) -> bool {
+    let ast::Expr::Attribute(attribute) = expr.func.as_ref() else {
+        return false;
+    };
+
+    matches!(attribute.attr.as_str(), "get" | "pop") && bindings.receiver_is_dict(expr)
 }
 
 fn is_ignored(settings: &Settings, func: &ast::Expr) -> bool {
@@ -91,6 +104,7 @@ const fn is_starred(expr: &ast::Expr) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::bindings::Bindings;
     use crate::settings::CallsUseKwargsSettings;
     use rustpython_parser::Parse;
     use rustpython_parser::ast::Suite;
@@ -106,6 +120,12 @@ mod tests {
             },
             other => panic!("expected expr stmt, got {other:?}"),
         }
+    }
+
+    fn bindings_from(source: &str) -> Bindings {
+        let module = Suite::parse(source, "<test>").expect("parse");
+
+        Bindings::from_module(&module)
     }
 
     #[test]
@@ -169,6 +189,7 @@ mod tests {
         let noqa = NoqaIndex::from_source("qs.filter(x=1).values_list(\"a\", \"b\")\n");
         let mut diagnostics = Vec::new();
         check(
+            &bindings_from("qs.filter(x=1).values_list(\"a\", \"b\")\n"),
             &locator,
             &noqa,
             Path::new("t.py"),
@@ -195,6 +216,7 @@ mod tests {
         let locator = Locator::new("pytest.param(1, 2)\n");
         let noqa = NoqaIndex::from_source("pytest.param(1, 2)\n");
         check(
+            &bindings_from("pytest.param(1, 2)\n"),
             &locator,
             &noqa,
             Path::new("t.py"),
@@ -208,6 +230,7 @@ mod tests {
         let locator = Locator::new("other.param(1, 2)\n");
         let noqa = NoqaIndex::from_source("other.param(1, 2)\n");
         check(
+            &bindings_from("other.param(1, 2)\n"),
             &locator,
             &noqa,
             Path::new("t.py"),
@@ -221,6 +244,7 @@ mod tests {
         let locator = Locator::new("param(1, 2)\n");
         let noqa = NoqaIndex::from_source("param(1, 2)\n");
         check(
+            &bindings_from("param(1, 2)\n"),
             &locator,
             &noqa,
             Path::new("t.py"),
@@ -242,6 +266,7 @@ mod tests {
         let noqa = NoqaIndex::from_source("isinstance(1, int)\n");
         let mut diagnostics = Vec::new();
         check(
+            &bindings_from("isinstance(1, int)\n"),
             &locator,
             &noqa,
             Path::new("t.py"),
@@ -265,6 +290,7 @@ mod tests {
         let noqa = NoqaIndex::from_source("print(1, 2)\n");
         let mut diagnostics = Vec::new();
         check(
+            &bindings_from("print(1, 2)\n"),
             &locator,
             &noqa,
             Path::new("t.py"),

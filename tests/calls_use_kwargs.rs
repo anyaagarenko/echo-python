@@ -33,6 +33,57 @@ fn method_two_positionals_are_reported() {
 }
 
 #[test]
+fn dict_get_is_clean() {
+    assert!(lint("data = {}\ndata.get(\"key\", None)\n").is_empty());
+}
+
+#[test]
+fn dict_pop_is_clean() {
+    assert!(lint("data: dict = {}\ndata.pop(\"key\", None)\n").is_empty());
+}
+
+#[test]
+fn custom_get_is_reported() {
+    assert_eq!(
+        RULE_CALLS_USE_KWARGS,
+        lint("repository.get(\"key\", None)\n")[0].code
+    );
+}
+
+#[test]
+fn custom_pop_is_reported() {
+    assert_eq!(
+        RULE_CALLS_USE_KWARGS,
+        lint("queue.pop(\"key\", None)\n")[0].code
+    );
+}
+
+#[test]
+fn decorator_uses_outer_scope() {
+    let source = "repository = object()\n@decorate(repository.get(\"key\", None))\ndef f(repository: dict):\n    pass\n";
+    assert_eq!(RULE_CALLS_USE_KWARGS, lint(source)[0].code);
+}
+
+#[test]
+fn other_dict_method_is_reported() {
+    assert_eq!(
+        RULE_CALLS_USE_KWARGS,
+        lint("data = {}\ndata.setdefault(\"key\", None)\n")[0].code
+    );
+}
+
+#[test]
+fn kwargs_get_is_clean() {
+    assert!(lint("def f(**options):\n    options.get(\"key\", None)\n").is_empty());
+}
+
+#[test]
+fn annotated_class_dict_get_is_clean() {
+    let source = "class C:\n    data: dict | None = None\n    def f(self):\n        self.data.get(\"key\", None)\n";
+    assert!(lint(source).is_empty());
+}
+
+#[test]
 fn self_then_one_arg_is_clean() {
     assert!(lint("Foo.m(self, x)\n").is_empty());
 }
