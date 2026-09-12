@@ -6,7 +6,11 @@ use echo_python::{
 };
 
 fn lint(source: &str) -> Vec<Diagnostic> {
-    check_source(Path::new("t.py"), source, &CheckOptions::default()).expect("lint")
+    let options = CheckOptions {
+        select: Some(vec!["ECHO002".into(), "ECHO003".into(), "ECHO004".into()]),
+        ..CheckOptions::default()
+    };
+    check_source(Path::new("t.py"), source, &options).expect("lint")
 }
 
 #[test]
@@ -127,4 +131,42 @@ fn noqa_suppresses_mixed() {
     let diags = lint("x = [\"a\", 1]  # noqa: ECHO002\n");
 
     assert!(diags.is_empty());
+}
+
+#[test]
+fn type_annotation_tuple_is_skipped() {
+    let diags = lint("def f() -> dict[str, Any]:\n    pass\n");
+
+    assert!(diags.is_empty());
+}
+
+#[test]
+fn ann_assign_annotation_is_skipped() {
+    let diags = lint("x: dict[str, Any]\n");
+
+    assert!(diags.is_empty());
+}
+
+#[test]
+fn parametrize_rows_are_skipped() {
+    let source =
+        "@pytest.mark.parametrize(\"a,b\", [(2, 1), (\"z\", 0)])\ndef f(a, b):\n    pass\n";
+
+    let diags = lint(source);
+
+    assert!(diags.is_empty());
+}
+
+#[test]
+fn pytest_param_args_are_skipped() {
+    let diags = lint("pytest.param(\"b\", \"a\")\n");
+
+    assert!(diags.is_empty());
+}
+
+#[test]
+fn bare_unsorted_tuple_is_still_reported() {
+    let diags = lint("x = (2, 1)\n");
+
+    assert_eq!(RULE_NUMBERS_LIST_SORTED, diags[0].code);
 }

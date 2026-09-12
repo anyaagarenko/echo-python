@@ -51,11 +51,13 @@ fn visit_module(
     diagnostics: &mut Vec<Diagnostic>,
 ) {
     let mut checker = Checker {
+        annotation_depth: 0,
         bindings,
         diagnostics,
         locator,
         noqa,
         path,
+        pytest_rows_depth: 0,
         settings,
     };
     for stmt in module {
