@@ -39,3 +39,9 @@ development:
 
   install mise https://github.com/jdx/mise#1-install-mise
   see Makefile
+
+
+publishing:
+
+  bump version in Cargo.toml on main
+  github → actions → pypi → run workflow (branch: main)
