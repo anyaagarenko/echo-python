@@ -14,3 +14,7 @@
 - Prefer many small tests over one test with many assertions.
 - In `assert_eq!`, put the expected value first: `assert_eq!(expected, actual)`.
 - Use long-form CLI flags only.
+- Before every commit, run `make mr`.
+- One action = one commit; push to the open PR after each change.
+- If on `main`, create a short kebab-case branch (one or two words) first.
+- Keep the PR description updated after every commit.

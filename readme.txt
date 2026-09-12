@@ -4,6 +4,7 @@ fast style helper for python projects (ruff compatible)
 install in a project:
 
   pip install echo-python
+<<<<<<< HEAD
 
 
 cli:
@@ -34,6 +35,32 @@ configure in pyproject.toml:
 
   [tool.echo-python.echo001]
   ignore = ["pytest.mark.parametrize", "pytest.param"]
+=======
+
+
+cli:
+
+  echo-python check .
+  echo-python check path/to/file.py
+  echo-python check --extend-select ECHO001 .
+  echo-python check --ignore ECHO001 .
+  echo-python check --select ECHO001 .
+
+
+rules:
+
+  ECHO001 - calls with multiple args must use keywords (self/cls exempt)
+  ECHO002 - mixed lists: numbers by value, then words alphabetically
+  ECHO003 - numeric lists sorted by value
+  ECHO004 - word/name lists sorted alphabetically
+  ECHO005 - params one per line when more than one (self/cls not counted)
+
+
+configure in pyproject.toml:
+
+  [tool.echo-python.lint]
+  extend-select, ignore, select
+>>>>>>> origin/main
 
 
 ignore a finding:
@@ -47,9 +74,12 @@ development:
   see Makefile
 
 
+<<<<<<< HEAD
 contributions welcome
 
 
+=======
+>>>>>>> origin/main
 publishing:
 
   bump version in Cargo.toml on main
