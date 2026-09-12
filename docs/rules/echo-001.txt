@@ -1,0 +1,68 @@
+ECHO001 - use keyword arguments for calls with multiple positional args
+
+
+why:
+
+  multi-arg positional calls are hard to read and reorder safely.
+  keyword args make call sites explicit and ready to sort later.
+
+
+bad:
+
+  create_user("ada", "lovelace", True)
+  client.request("GET", url)
+
+
+good:
+
+  create_user(first="ada", last="lovelace", active=True)
+  client.request(method="GET", url=url)
+
+
+allowed without keywords:
+
+  one positional arg (or self/cls plus one)
+  starred args are not counted
+  real builtins (isinstance, round, int, zip, ...)
+  builtins.isinstance(...)
+  mapping .get / .pop / .setdefault with exactly two positionals
+    data.get("key", None)
+    kwargs.setdefault("timeout", 1)
+
+
+not allowed as builtins when shadowed or imported:
+
+  isinstance = check
+  isinstance(1, int)
+
+  from helpers import isinstance
+  isinstance(1, int)
+
+
+use:
+
+  echo-python check --select ECHO001 .
+  echo-python check --ignore ECHO001 .
+
+
+configure in pyproject.toml:
+
+  [tool.echo-python.lint]
+  ignore = ["ECHO001"]
+  select = ["ECHO001"]
+
+  [tool.echo-python.calls-use-kwargs]
+  ignore = ["path", "parametrize", "pytest.param", "register", "spy"]
+
+
+ignore matches the short name or a dotted path:
+
+  path                 django urls path(...)
+  parametrize          pytest.mark.parametrize
+  pytest.param         only pytest.param, not other.param
+  values_list          qs.filter(...).values_list(...)
+
+
+ignore a finding:
+
+  f(1, 2)  # noqa: ECHO001

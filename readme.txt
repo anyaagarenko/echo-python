@@ -15,6 +15,7 @@ use as:
 rules:
 
   ECHO001 - use keyword arguments for calls with multiple positional args
+            see docs/rules/echo-001.txt
   ECHO002 - mixed list is not sorted (numbers then words)
   ECHO003 - numbers list is not sorted
   ECHO004 - words list is not sorted
