@@ -6,6 +6,9 @@ yamlfiles = $(shell find . \( -name "*.yaml" -o -name "*.yml" \) \
 	! -path "./target/*" \
 	| sort)
 
+-include .env
+export UV_PUBLISH_TOKEN
+
 fmt:
 	cargo fmt
 	cargo clippy --all-targets --fix --allow-dirty --allow-staged
@@ -26,7 +29,7 @@ mr: fmt check test
 
 publish-pypi:
 	@test -n "$(version)" || (echo 'usage: make publish-pypi version=0.1.1' >&2; exit 1)
-	@test -n "$$UV_PUBLISH_TOKEN" || (echo 'set UV_PUBLISH_TOKEN to a pypi api token' >&2; exit 1)
+	@test -n "$(UV_PUBLISH_TOKEN)" || (echo 'set UV_PUBLISH_TOKEN in .env' >&2; exit 1)
 	sed -i '' 's/^version = ".*"/version = "$(version)"/' Cargo.toml
 	rm -rf dist
 	uvx maturin build --release --locked --sdist --out dist
