@@ -41,24 +41,24 @@ mod tests {
     #[test]
     fn callee_path_from_attribute() {
         assert_eq!(
-            Some("obj.append".to_string()),
-            callee_path(&func_from("obj.append(1, 2)\n"))
+            Some("obj.append"),
+            callee_path(&func_from("obj.append(1, 2)\n")).as_deref()
         );
     }
 
     #[test]
     fn callee_path_from_nested_attribute() {
         assert_eq!(
-            Some("pytest.param".to_string()),
-            callee_path(&func_from("pytest.param(1, 2)\n"))
+            Some("pytest.param"),
+            callee_path(&func_from("pytest.param(1, 2)\n")).as_deref()
         );
     }
 
     #[test]
     fn callee_path_falls_back_on_call_chain() {
         assert_eq!(
-            Some("values_list".to_string()),
-            callee_path(&func_from("qs.filter(x=1).values_list(\"a\", \"b\")\n"))
+            Some("values_list"),
+            callee_path(&func_from("qs.filter(x=1).values_list(\"a\", \"b\")\n")).as_deref()
         );
     }
 }
