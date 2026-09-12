@@ -10,11 +10,9 @@ bad:
 
   ["b", "a"]
   [zeta, alpha, beta]
-  ["yy", "xx"]
 
 
 good:
 
   ["a", "b"]
   [alpha, beta, zeta]
-  ["xx", "yy"]
