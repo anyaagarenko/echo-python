@@ -109,6 +109,19 @@ fn isinstance_is_clean() {
 }
 
 #[test]
+fn builtins_isinstance_is_clean() {
+    assert!(lint("builtins.isinstance(1, int)\n").is_empty());
+}
+
+#[test]
+fn shadowed_isinstance_is_reported() {
+    assert_eq!(
+        RULE_CALLS_USE_KWARGS,
+        lint("isinstance = check\nisinstance(1, int)\n")[0].code
+    );
+}
+
+#[test]
 fn select_only_other_rule_skips() {
     let options = CheckOptions {
         select: Some(vec!["ECHO003".into()]),

@@ -8,14 +8,13 @@ use crate::locator::Locator;
 use crate::noqa::NoqaIndex;
 use crate::settings::Settings;
 
-const DEFAULT_IGNORE: &[&str] = &[
+const DEFAULT_BUILTINS: &[&str] = &[
     "getattr",
     "hasattr",
     "isinstance",
     "issubclass",
     "max",
     "min",
-    "path",
     "setattr",
     "zip",
 ];
@@ -29,7 +28,10 @@ pub(crate) fn check(
     expr: &ast::ExprCall,
     diagnostics: &mut Vec<Diagnostic>,
 ) {
-    if is_ignored(settings, &expr.func) {
+    if is_ignored_builtin(bindings, expr) {
+        return;
+    }
+    if is_ignored_config(settings, &expr.func) {
         return;
     }
     if is_positional_only_dict_method(bindings, expr) {
@@ -57,14 +59,18 @@ fn is_positional_only_dict_method(bindings: &Bindings, expr: &ast::ExprCall) -> 
     matches!(attribute.attr.as_str(), "get" | "pop") && bindings.receiver_is_dict(expr)
 }
 
-fn is_ignored(settings: &Settings, func: &ast::Expr) -> bool {
+fn is_ignored_builtin(bindings: &Bindings, expr: &ast::ExprCall) -> bool {
+    DEFAULT_BUILTINS
+        .iter()
+        .any(|name| bindings.match_builtin_expr(expr, name))
+}
+
+fn is_ignored_config(settings: &Settings, func: &ast::Expr) -> bool {
     let Some(path) = callee_path(func) else {
         return false;
     };
     let short = path.rsplit('.').next().unwrap_or(path.as_str());
-    DEFAULT_IGNORE.contains(&short)
-        || settings.calls_use_kwargs.ignores(path.as_str())
-        || settings.calls_use_kwargs.ignores(short)
+    settings.calls_use_kwargs.ignores(path.as_str()) || settings.calls_use_kwargs.ignores(short)
 }
 
 fn callee_path(func: &ast::Expr) -> Option<String> {
@@ -275,6 +281,59 @@ mod tests {
             &mut diagnostics,
         );
         assert!(diagnostics.is_empty());
+    }
+
+    #[test]
+    fn builtins_isinstance_is_ignored() {
+        let source = "builtins.isinstance(1, int)\n";
+        let call = call_from(source);
+        let settings = Settings {
+            enabled: HashSet::from([RULE_CALLS_USE_KWARGS.to_string()]),
+            calls_use_kwargs: CallsUseKwargsSettings::default(),
+        };
+        let locator = Locator::new(source);
+        let noqa = NoqaIndex::from_source(source);
+        let mut diagnostics = Vec::new();
+        check(
+            &bindings_from(source),
+            &locator,
+            &noqa,
+            Path::new("t.py"),
+            &settings,
+            &call,
+            &mut diagnostics,
+        );
+        assert!(diagnostics.is_empty());
+    }
+
+    #[test]
+    fn shadowed_isinstance_is_reported() {
+        let source = "isinstance = check\nisinstance(1, int)\n";
+        let module = Suite::parse(source, "<test>").expect("parse");
+        let call = match module.into_iter().nth(1).expect("stmt") {
+            ast::Stmt::Expr(stmt) => match *stmt.value {
+                ast::Expr::Call(call) => call,
+                other => panic!("expected call, got {other:?}"),
+            },
+            other => panic!("expected expr stmt, got {other:?}"),
+        };
+        let settings = Settings {
+            enabled: HashSet::from([RULE_CALLS_USE_KWARGS.to_string()]),
+            calls_use_kwargs: CallsUseKwargsSettings::default(),
+        };
+        let locator = Locator::new(source);
+        let noqa = NoqaIndex::from_source(source);
+        let mut diagnostics = Vec::new();
+        check(
+            &bindings_from(source),
+            &locator,
+            &noqa,
+            Path::new("t.py"),
+            &settings,
+            &call,
+            &mut diagnostics,
+        );
+        assert_eq!(1, diagnostics.len());
     }
 
     #[test]

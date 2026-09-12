@@ -50,6 +50,13 @@ impl Bindings {
         self.expression_is_dict(method.value.as_ref(), *scope)
     }
 
+    pub(crate) fn match_builtin_expr(&self, call: &ast::ExprCall, builtin: &str) -> bool {
+        let Some(scope) = self.call_scopes.get(&call.range.start()) else {
+            return bare_or_builtins_attr(call.func.as_ref(), builtin);
+        };
+        match_builtin_expr(call.func.as_ref(), builtin, *scope, self)
+    }
+
     fn expression_is_dict(&self, expression: &ast::Expr, scope: usize) -> bool {
         match expression {
             ast::Expr::Name(name) => self.lookup(name.id.as_str(), scope) == Some(Binding::Dict),
@@ -84,6 +91,10 @@ impl Bindings {
             }
             scope = self.scopes[scope].parent?;
         }
+    }
+
+    fn is_unbound(&self, name: &str, scope: usize) -> bool {
+        self.lookup(name, scope).is_none()
     }
 
     fn ancestor(&self, mut scope: usize, kind: ScopeKind) -> Option<usize> {
@@ -225,6 +236,7 @@ impl Visitor for Collector {
     }
 
     fn visit_stmt_async_function_def(&mut self, node: ast::StmtAsyncFunctionDef) {
+        self.bind(node.name.as_str(), Binding::Unknown);
         self.visit_function_outer(
             &node.args,
             &node.decorator_list,
@@ -240,6 +252,7 @@ impl Visitor for Collector {
     }
 
     fn visit_stmt_class_def(&mut self, node: ast::StmtClassDef) {
+        self.bind(node.name.as_str(), Binding::Unknown);
         for base in &node.bases {
             self.visit_expr(base.clone());
         }
@@ -260,6 +273,7 @@ impl Visitor for Collector {
     }
 
     fn visit_stmt_function_def(&mut self, node: ast::StmtFunctionDef) {
+        self.bind(node.name.as_str(), Binding::Unknown);
         self.visit_function_outer(
             &node.args,
             &node.decorator_list,
@@ -273,6 +287,59 @@ impl Visitor for Collector {
         }
         self.leave_scope(parent);
     }
+
+    fn visit_stmt_import(&mut self, node: ast::StmtImport) {
+        for alias in &node.names {
+            self.bind(import_bound_name(alias), Binding::Unknown);
+        }
+        self.generic_visit_stmt_import(node);
+    }
+
+    fn visit_stmt_import_from(&mut self, node: ast::StmtImportFrom) {
+        for alias in &node.names {
+            if alias.name.as_str() == "*" {
+                continue;
+            }
+            self.bind(import_bound_name(alias), Binding::Unknown);
+        }
+        self.generic_visit_stmt_import_from(node);
+    }
+}
+
+fn match_builtin_expr(
+    expression: &ast::Expr,
+    builtin: &str,
+    scope: usize,
+    bindings: &Bindings,
+) -> bool {
+    match expression {
+        ast::Expr::Name(name) => {
+            name.id.as_str() == builtin && bindings.is_unbound(name.id.as_str(), scope)
+        }
+        ast::Expr::Attribute(_) => bare_or_builtins_attr(expression, builtin),
+        _ => false,
+    }
+}
+
+fn bare_or_builtins_attr(expression: &ast::Expr, builtin: &str) -> bool {
+    match expression {
+        ast::Expr::Name(name) => name.id.as_str() == builtin,
+        ast::Expr::Attribute(attribute) => {
+            attribute.attr.as_str() == builtin
+                && matches!(
+                    attribute.value.as_ref(),
+                    ast::Expr::Name(name) if name.id.as_str() == "builtins"
+                )
+        }
+        _ => false,
+    }
+}
+
+fn import_bound_name(alias: &ast::Alias) -> &str {
+    if let Some(name) = &alias.asname {
+        return name.as_str();
+    }
+    alias.name.split('.').next().unwrap_or(alias.name.as_str())
 }
 
 fn expression_creates_dict(expression: &ast::Expr) -> bool {
@@ -393,6 +460,42 @@ mod tests {
     fn conflicting_assignment_is_not_dict() {
         assert!(!receiver_is_dict(
             "data = {}\ndata = repository\ndata.get(\"a\", None)\n"
+        ));
+    }
+
+    fn match_builtin(source: &str, builtin: &str) -> bool {
+        let module = ast::Suite::parse(source, "<test>").expect("parse");
+        let bindings = Bindings::from_module(&module);
+        let mut calls = Calls::default();
+        for statement in module {
+            calls.visit_stmt(statement);
+        }
+        bindings.match_builtin_expr(calls.items.last().expect("call"), builtin)
+    }
+
+    #[test]
+    fn unbound_isinstance_matches_builtin() {
+        assert!(match_builtin("isinstance(1, int)\n", "isinstance"));
+    }
+
+    #[test]
+    fn builtins_attr_matches_builtin() {
+        assert!(match_builtin("builtins.isinstance(1, int)\n", "isinstance"));
+    }
+
+    #[test]
+    fn shadowed_isinstance_does_not_match_builtin() {
+        assert!(!match_builtin(
+            "isinstance = check\nisinstance(1, int)\n",
+            "isinstance"
+        ));
+    }
+
+    #[test]
+    fn imported_isinstance_does_not_match_builtin() {
+        assert!(!match_builtin(
+            "from helpers import isinstance\nisinstance(1, int)\n",
+            "isinstance"
         ));
     }
 }
