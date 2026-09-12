@@ -10,19 +10,28 @@ fmt:
 	cargo fmt
 	cargo clippy --all-targets --fix --allow-dirty --allow-staged
 	mise exec -- toml-sort $(tomls)
-	@$(yamlsort) --input $(yamlfiles) --lineWidth -1
+	@if [ -n "$(yamlfiles)" ]; then $(yamlsort) --input $(yamlfiles) --lineWidth -1; fi
 	make sort-dotfiles
 
 check:
 	cargo fmt -- --check
 	cargo clippy --all-targets
 	mise exec -- toml-sort $(tomls) --check
-	@$(yamlsort) --check --input $(yamlfiles) --lineWidth -1
+	@if [ -n "$(yamlfiles)" ]; then $(yamlsort) --check --input $(yamlfiles) --lineWidth -1; fi
 
 test:
 	cargo test
 
 mr: fmt check test
+
+publish-pypi:
+	@test -n "$(version)" || (echo 'usage: make publish-pypi version=0.1.1' >&2; exit 1)
+	@test -n "$$UV_PUBLISH_TOKEN" || (echo 'set UV_PUBLISH_TOKEN to a pypi api token' >&2; exit 1)
+	sed -i '' 's/^version = ".*"/version = "$(version)"/' Cargo.toml
+	rm -rf dist
+	uvx maturin build --release --locked --sdist --out dist
+	docker run --rm --volume "$(CURDIR):/io" ghcr.io/pyo3/maturin build --release --locked --out /io/dist --target x86_64-unknown-linux-gnu
+	uv publish dist/*
 
 sort-dotfile:
 	sort --output $(dotfile) $(dotfile)
