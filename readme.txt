@@ -3,11 +3,14 @@ fast style helper for python projects (ruff compatible)
 
 install in a project:
 
+  pip install echo-python
+  uv add --dev echo-python
   mise use github:anyaagarenko/echo-python
 
 
 cli:
 
+  echo-python check .
   mise exec -- echo-python check .
   mise exec -- echo-python check path/to/file.py
   mise exec -- echo-python check --extend-select ECHO001 .
@@ -39,3 +42,5 @@ development:
 
   install mise https://github.com/jdx/mise#1-install-mise
   see Makefile
+  tag vX.Y.Z to publish GitHub release and PyPI
+  add a PyPI trusted publisher for .github/workflows/pypi.yml
