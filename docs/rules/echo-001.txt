@@ -1,22 +1,41 @@
-ECHO001 - use keyword arguments for calls with multiple positional args
+ECHO001 - use keyword arguments for multi-arg calls when keywords are possible
 
 
 why:
 
   multi-arg positional calls are hard to read and reorder safely.
   keyword args make call sites explicit and ready to sort later.
+  the rule only fires when those arguments can actually be passed
+  as keywords.
 
 
 bad:
 
   create_user("ada", "lovelace", True)
   client.request("GET", url)
+  open("notes.txt", "r")
+  round(1.234, 2)
 
 
 good:
 
   create_user(first="ada", last="lovelace", active=True)
   client.request(method="GET", url=url)
+  open(file="notes.txt", mode="r")
+  round(number=1.234, ndigits=2)
+
+
+skipped (keywords are not possible):
+
+  builtins with positional-only / *args APIs
+    isinstance(1, int)
+    print(1, 2)
+    max(1, 2)
+  mapping get / pop / setdefault with two positionals
+    data.get("key", None)
+  django queryset *args / *fields style calls
+    User.objects.filter(Q(a), Q(b))
+    qs.select_related("a", "b")
 
 
 configure in pyproject.toml:

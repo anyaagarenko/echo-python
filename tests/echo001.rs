@@ -131,15 +131,29 @@ fn annotated_class_dict_get_is_clean() {
 }
 
 #[test]
-fn round_is_clean() {
+fn round_is_reported() {
     let diags = lint("round(1.5, 2)\n");
 
-    assert!(diags.is_empty());
+    assert_eq!(RULE_ECHO001, diags[0].code);
 }
 
 #[test]
-fn int_is_clean() {
+fn int_is_reported() {
     let diags = lint("int(\"1\", 10)\n");
+
+    assert_eq!(RULE_ECHO001, diags[0].code);
+}
+
+#[test]
+fn open_is_reported() {
+    let diags = lint("open(\"a\", \"r\")\n");
+
+    assert_eq!(RULE_ECHO001, diags[0].code);
+}
+
+#[test]
+fn print_is_clean() {
+    let diags = lint("print(1, 2)\n");
 
     assert!(diags.is_empty());
 }
@@ -219,9 +233,9 @@ fn ignore_rule_skips() {
 
 #[test]
 fn ignore_from_pyproject() {
-    let pyproject = "[tool.echo-python.echo001]\nignore = [\"print\"]\n";
+    let pyproject = "[tool.echo-python.echo001]\nignore = [\"helper\"]\n";
 
-    let diags = lint_project(pyproject, "print(1, 2)\n");
+    let diags = lint_project(pyproject, "helper(1, 2)\n");
 
     assert!(diags.is_empty());
 }
