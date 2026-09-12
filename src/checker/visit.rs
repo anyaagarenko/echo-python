@@ -2,26 +2,62 @@ use rustpython_parser::ast::{self, Visitor};
 
 use super::Checker;
 use crate::RULE_ECHO001;
-use crate::RULE_MIXED_LIST_SORTED;
-use crate::RULE_NUMBERS_LIST_SORTED;
 use crate::RULE_PARAMS_ONE_PER_LINE;
-use crate::RULE_WORDS_LIST_SORTED;
-use crate::rules::{
-    echo001, mixed_list_sorted, numbers_list_sorted, params_one_per_line, words_list_sorted,
-};
+use crate::rules::{echo001, params_one_per_line, sorted_literals};
 
 impl Visitor for Checker<'_> {
     fn visit_expr_list(&mut self, node: ast::ExprList) {
-        if self.settings.is_enabled(RULE_NUMBERS_LIST_SORTED) {
-            numbers_list_sorted::check(self.locator, self.noqa, self.path, &node, self.diagnostics);
-        }
-        if self.settings.is_enabled(RULE_WORDS_LIST_SORTED) {
-            words_list_sorted::check(self.locator, self.noqa, self.path, &node, self.diagnostics);
-        }
-        if self.settings.is_enabled(RULE_MIXED_LIST_SORTED) {
-            mixed_list_sorted::check(self.locator, self.noqa, self.path, &node, self.diagnostics);
-        }
+        sorted_literals::check(
+            self.locator,
+            self.noqa,
+            self.path,
+            self.settings,
+            &node.elts,
+            &node,
+            self.diagnostics,
+        );
         self.generic_visit_expr_list(node);
+    }
+
+    fn visit_expr_tuple(&mut self, node: ast::ExprTuple) {
+        sorted_literals::check(
+            self.locator,
+            self.noqa,
+            self.path,
+            self.settings,
+            &node.elts,
+            &node,
+            self.diagnostics,
+        );
+        self.generic_visit_expr_tuple(node);
+    }
+
+    fn visit_expr_set(&mut self, node: ast::ExprSet) {
+        sorted_literals::check(
+            self.locator,
+            self.noqa,
+            self.path,
+            self.settings,
+            &node.elts,
+            &node,
+            self.diagnostics,
+        );
+        self.generic_visit_expr_set(node);
+    }
+
+    fn visit_expr_dict(&mut self, node: ast::ExprDict) {
+        if let Some(keys) = dict_keys(&node) {
+            sorted_literals::check(
+                self.locator,
+                self.noqa,
+                self.path,
+                self.settings,
+                keys,
+                &node,
+                self.diagnostics,
+            );
+        }
+        self.generic_visit_expr_dict(node);
     }
 
     fn visit_expr_call(&mut self, node: ast::ExprCall) {
@@ -64,4 +100,11 @@ impl Visitor for Checker<'_> {
         }
         self.generic_visit_stmt_async_function_def(node);
     }
+}
+
+fn dict_keys(dict: &ast::ExprDict) -> Option<Vec<&ast::Expr>> {
+    dict.keys
+        .iter()
+        .map(|key| key.as_ref())
+        .collect::<Option<Vec<_>>>()
 }
