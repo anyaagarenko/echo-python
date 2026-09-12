@@ -26,6 +26,7 @@ rules:
   ECHO004 - word literals are not sorted
             https://github.com/anyaagarenko/echo-python/blob/main/docs/rules/echo-004.txt
   ECHO005 - put each parameter on its own line when a function has more than one parameter
+            https://github.com/anyaagarenko/echo-python/blob/main/docs/rules/echo-005.txt
 
 
 configure in pyproject.toml:

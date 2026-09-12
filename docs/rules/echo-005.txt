@@ -1,0 +1,44 @@
+ECHO005 - put each parameter on its own line when a function has more than one parameter
+
+
+why:
+
+  multi-parameter signatures are easier to read and to sort keyword-only
+  names when each parameter is on its own line.
+
+
+bad:
+
+  def f(a, b):
+      pass
+
+  def paint(self, primary, secondary):
+      pass
+
+
+good:
+
+  def f(
+      a,
+      b,
+  ):
+      pass
+
+  def paint(
+      self,
+      primary,
+  ):
+      pass
+
+  def paint(
+      self,
+      primary,
+      secondary,
+  ):
+      pass
+
+
+skipped:
+
+  self / cls are not counted
+  one countable parameter may stay on one line with self / cls
