@@ -10,11 +10,11 @@ bad:
 
   ["b", "a"]
   [zeta, alpha, beta]
-  ["password", "email"]
+  ["yy", "xx"]
 
 
 good:
 
   ["a", "b"]
   [alpha, beta, zeta]
-  ["email", "password"]
+  ["xx", "yy"]
