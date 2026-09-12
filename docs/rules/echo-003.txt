@@ -1,0 +1,20 @@
+ECHO003 - numbers list is not sorted
+
+
+why:
+
+  numeric lists are easier to scan when values increase.
+
+
+bad:
+
+  [100500, 4911]
+  [2, 1]
+  [True, False]
+
+
+good:
+
+  [4911, 100500]
+  [-2, -1, 0, 3]
+  [False, True]
