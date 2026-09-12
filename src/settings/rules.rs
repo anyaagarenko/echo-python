@@ -1,12 +1,12 @@
 use std::collections::HashSet;
 
 use crate::{
-    RULE_CALLS_USE_KWARGS, RULE_MIXED_LIST_SORTED, RULE_NUMBERS_LIST_SORTED,
-    RULE_PARAMS_ONE_PER_LINE, RULE_WORDS_LIST_SORTED,
+    RULE_ECHO001, RULE_MIXED_LIST_SORTED, RULE_NUMBERS_LIST_SORTED, RULE_PARAMS_ONE_PER_LINE,
+    RULE_WORDS_LIST_SORTED,
 };
 
 pub(crate) const ALL_RULES: &[&str] = &[
-    RULE_CALLS_USE_KWARGS,
+    RULE_ECHO001,
     RULE_MIXED_LIST_SORTED,
     RULE_NUMBERS_LIST_SORTED,
     RULE_WORDS_LIST_SORTED,
@@ -83,12 +83,14 @@ mod tests {
     #[test]
     fn all_selects_every_rule() {
         let enabled = expand_selector("ALL");
+
         assert_eq!(ALL_RULES.len(), enabled.len());
     }
 
     #[test]
     fn prefix_selects_group() {
         let enabled = expand_selector("ECHO003");
+
         assert!(enabled.contains(RULE_NUMBERS_LIST_SORTED));
         assert!(!enabled.contains(RULE_WORDS_LIST_SORTED));
     }
@@ -96,6 +98,7 @@ mod tests {
     #[test]
     fn echo_prefix_selects_all_echo_rules() {
         let enabled = expand_selector("ECHO");
+
         assert_eq!(ALL_RULES.len(), enabled.len());
     }
 
@@ -109,7 +112,9 @@ mod tests {
             select: Some(vec!["ECHO004".into()]),
             ..CheckOptions::default()
         };
+
         let enabled = resolve_enabled(&file, &cli);
+
         assert!(enabled.contains(RULE_WORDS_LIST_SORTED));
         assert!(!enabled.contains(RULE_NUMBERS_LIST_SORTED));
     }
@@ -121,8 +126,10 @@ mod tests {
             ignore: vec!["ECHO001".into()],
             ..LintFileSettings::default()
         };
+
         let enabled = resolve_enabled(&file, &CheckOptions::default());
-        assert!(!enabled.contains(RULE_CALLS_USE_KWARGS));
+
+        assert!(!enabled.contains(RULE_ECHO001));
         assert!(enabled.contains(RULE_NUMBERS_LIST_SORTED));
     }
 
@@ -133,7 +140,9 @@ mod tests {
             extend_select: vec!["ECHO004".into()],
             ..LintFileSettings::default()
         };
+
         let enabled = resolve_enabled(&file, &CheckOptions::default());
+
         assert!(enabled.contains(RULE_NUMBERS_LIST_SORTED));
         assert!(enabled.contains(RULE_WORDS_LIST_SORTED));
     }

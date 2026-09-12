@@ -17,17 +17,23 @@ cli:
 
 rules:
 
-  ECHO001 - calls with multiple args must use keywords (self/cls exempt)
-  ECHO002 - mixed lists: numbers by value, then words alphabetically
-  ECHO003 - numeric lists sorted by value
-  ECHO004 - word/name lists sorted alphabetically
-  ECHO005 - params one per line when more than one (self/cls not counted)
+  ECHO001 - use keyword arguments for calls with multiple positional args
+            https://github.com/anyaagarenko/echo-python/blob/main/docs/rules/echo-001.txt
+  ECHO002 - mixed list is not sorted (numbers then words)
+  ECHO003 - numbers list is not sorted
+  ECHO004 - words list is not sorted
+  ECHO005 - put each parameter on its own line when a function has more than one parameter
 
 
 configure in pyproject.toml:
 
   [tool.echo-python.lint]
-  extend-select, ignore, select
+  extend-select = ["ECHO002"]
+  ignore = ["ECHO001"]
+  select = ["ALL"]
+
+  [tool.echo-python.echo001]
+  ignore = ["pytest.mark.parametrize", "pytest.param"]
 
 
 ignore a finding:
@@ -39,6 +45,9 @@ development:
 
   install mise https://github.com/jdx/mise#1-install-mise
   see Makefile
+
+
+contributions welcome
 
 
 publishing:

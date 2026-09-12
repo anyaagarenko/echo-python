@@ -1,14 +1,13 @@
 use rustpython_parser::ast::{self, Visitor};
 
 use super::Checker;
-use crate::RULE_CALLS_USE_KWARGS;
+use crate::RULE_ECHO001;
 use crate::RULE_MIXED_LIST_SORTED;
 use crate::RULE_NUMBERS_LIST_SORTED;
 use crate::RULE_PARAMS_ONE_PER_LINE;
 use crate::RULE_WORDS_LIST_SORTED;
 use crate::rules::{
-    calls_use_kwargs, mixed_list_sorted, numbers_list_sorted, params_one_per_line,
-    words_list_sorted,
+    echo001, mixed_list_sorted, numbers_list_sorted, params_one_per_line, words_list_sorted,
 };
 
 impl Visitor for Checker<'_> {
@@ -26,8 +25,9 @@ impl Visitor for Checker<'_> {
     }
 
     fn visit_expr_call(&mut self, node: ast::ExprCall) {
-        if self.settings.is_enabled(RULE_CALLS_USE_KWARGS) {
-            calls_use_kwargs::check(
+        if self.settings.is_enabled(RULE_ECHO001) {
+            echo001::check(
+                self.bindings,
                 self.locator,
                 self.noqa,
                 self.path,
