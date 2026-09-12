@@ -24,6 +24,7 @@ rules:
   ECHO003 - numbers list is not sorted
             https://github.com/anyaagarenko/echo-python/blob/main/docs/rules/echo-003.txt
   ECHO004 - words list is not sorted
+            https://github.com/anyaagarenko/echo-python/blob/main/docs/rules/echo-004.txt
   ECHO005 - put each parameter on its own line when a function has more than one parameter
 
 
