@@ -3,14 +3,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Build wheels
+      - name: build wheels
         uses: PyO3/maturin-action@v1
         with:
           args: '--release --out dist --locked'
           manylinux: auto
           sccache: true
           target: x86_64
-      - name: Upload wheels
+      - name: upload wheels
         uses: actions/upload-artifact@v6
         with:
           name: wheels-linux-x86_64
@@ -19,19 +19,19 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Build wheels
+      - name: build wheels
         uses: PyO3/maturin-action@v1
         with:
           args: '--release --out dist --locked'
           sccache: true
           target: aarch64
-      - name: Upload wheels
+      - name: upload wheels
         uses: actions/upload-artifact@v6
         with:
           name: wheels-macos-aarch64
           path: dist
   release:
-    name: Publish
+    name: publish
     needs:
       - linux
       - macos
@@ -44,25 +44,25 @@ jobs:
         with:
           merge-multiple: true
           path: dist
-      - name: Install uv
+      - name: install uv
         uses: astral-sh/setup-uv@v7
-      - name: Publish to PyPI
+      - name: publish to pypi
         run: uv publish --trusted-publishing always --skip-existing dist/*
   sdist:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Build sdist
+      - name: build sdist
         uses: PyO3/maturin-action@v1
         with:
           args: '--out dist'
           command: sdist
-      - name: Upload sdist
+      - name: upload sdist
         uses: actions/upload-artifact@v6
         with:
           name: wheels-sdist
           path: dist
-name: PyPI
+name: pypi
 'on':
   push:
     branches:
