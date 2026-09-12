@@ -27,19 +27,6 @@ requires = ["maturin>=1.9,<2.0"]
 bindings = "bin"
 strip = true
 
-[tool.maturin.generate-ci.github]
-args = "--locked"
-trusted-publishing = true
-
-[tool.maturin.generate-ci.github.linux]
-targets = ["aarch64", "x86_64"]
-
-[tool.maturin.generate-ci.github.macos]
-targets = ["aarch64", "x86_64"]
-
-[tool.maturin.generate-ci.github.windows]
-targets = ["x86_64"]
-
 [tool.tomlsort]
 all = true
 in_place = true

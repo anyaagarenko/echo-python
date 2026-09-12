@@ -42,5 +42,10 @@ development:
 
   install mise https://github.com/jdx/mise#1-install-mise
   see Makefile
-  tag vX.Y.Z to publish GitHub release and PyPI
-  add a PyPI trusted publisher for .github/workflows/pypi.yml
+
+publish to pypi from your machine (no github actions):
+
+  bump version in Cargo.toml
+  create an api token at https://pypi.org/manage/account/token/
+  uvx maturin build --release --locked --sdist --out dist
+  uv publish --token pypi-... dist/*
