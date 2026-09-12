@@ -20,6 +20,7 @@ rules:
   ECHO001 - use keyword arguments for calls with multiple positional args
             https://github.com/anyaagarenko/echo-python/blob/main/docs/rules/echo-001.txt
   ECHO002 - mixed list is not sorted (numbers then words)
+            https://github.com/anyaagarenko/echo-python/blob/main/docs/rules/echo-002.txt
   ECHO003 - numbers list is not sorted
   ECHO004 - words list is not sorted
   ECHO005 - put each parameter on its own line when a function has more than one parameter
