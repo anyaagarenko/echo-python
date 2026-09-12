@@ -1,2 +1,4 @@
 [tools]
+"aqua:crate-ci/typos" = "1.50.1"
+"aqua:rhysd/actionlint" = "1.7.12"
 "pipx:toml-sort" = "0.24.2"

@@ -18,6 +18,8 @@ check:
 	cargo clippy --all-targets
 	mise exec -- toml-sort $(tomls) --check
 	@$(yamlsort) --check --input $(yamlfiles) --lineWidth -1
+	mise exec -- actionlint
+	mise exec -- typos
 
 test:
 	cargo test
