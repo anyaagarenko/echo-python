@@ -19,15 +19,6 @@ good:
   client.request(method="GET", url=url)
 
 
-not allowed as builtins when shadowed or imported:
-
-  isinstance = check
-  isinstance(1, int)
-
-  from helpers import isinstance
-  isinstance(1, int)
-
-
 configure in pyproject.toml:
 
   [tool.echo-python.echo001]
