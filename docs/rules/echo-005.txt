@@ -1,0 +1,34 @@
+ECHO005 - keyword-only parameters are not sorted
+
+
+why:
+
+  keyword-only parameter names are easier to scan when sorted
+  alphabetically. positional parameters keep their call order.
+
+
+bad:
+
+  def f(*, b, a):
+      pass
+
+  def paint(self, *, secondary, primary):
+      pass
+
+
+good:
+
+  def f(*, a, b):
+      pass
+
+  def paint(self, *, primary, secondary):
+      pass
+
+  def f(b, a):
+      pass
+
+
+skipped:
+
+  positional and positional-only parameters
+  *args / **kwargs stay in place
