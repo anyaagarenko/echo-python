@@ -28,12 +28,7 @@ rules:
 configure in pyproject.toml:
 
   [tool.echo-python.lint]
-  extend-select = ["ECHO002"]
-  ignore = ["ECHO001"]
-  select = ["ALL"]
-
-  [tool.echo-python.echo001]
-  ignore = ["pytest.mark.parametrize", "pytest.param"]
+  extend-select, ignore, select
 
 
 ignore a finding:
