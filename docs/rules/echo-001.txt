@@ -9,14 +9,14 @@ why:
 
 bad:
 
-  paint("red", "blue", True)
-  send("GET", path)
+  f("b", "a", True)
+  g("x", y)
 
 
 good:
 
-  paint(primary="red", secondary="blue", filled=True)
-  send(method="GET", path=path)
+  f(left="b", right="a", flag=True)
+  g(kind="x", target=y)
 
 
 configure in pyproject.toml:
