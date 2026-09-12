@@ -1,4 +1,4 @@
-tomls = Cargo.toml mise.toml pyproject.toml rustfmt.toml
+tomls = Cargo.toml mise.toml pyproject.toml rust-toolchain.toml rustfmt.toml
 yamlsort = npx --yes yaml-sort@3.0.0
 yamlfiles = $(shell find . \( -name "*.yaml" -o -name "*.yml" \) \
 	! -path "./.git/*" \

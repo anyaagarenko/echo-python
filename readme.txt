@@ -3,16 +3,16 @@ fast style helper for python projects (ruff compatible)
 
 install in a project:
 
-  mise use github:anyaagarenko/echo-python
+  pip install echo-python
 
 
 cli:
 
-  mise exec -- echo-python check .
-  mise exec -- echo-python check path/to/file.py
-  mise exec -- echo-python check --extend-select ECHO001 .
-  mise exec -- echo-python check --ignore ECHO001 .
-  mise exec -- echo-python check --select ECHO001 .
+  echo-python check .
+  echo-python check path/to/file.py
+  echo-python check --extend-select ECHO001 .
+  echo-python check --ignore ECHO001 .
+  echo-python check --select ECHO001 .
 
 
 rules:
@@ -39,3 +39,9 @@ development:
 
   install mise https://github.com/jdx/mise#1-install-mise
   see Makefile
+
+
+publishing:
+
+  bump version in Cargo.toml on main
+  github → actions → pypi → run workflow (branch: main)
