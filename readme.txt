@@ -38,7 +38,7 @@ configure in pyproject.toml:
 
 ignore a finding:
 
-  f(1, 2)  # noqa: ECHO001
+  use noqa
 
 
 development:
