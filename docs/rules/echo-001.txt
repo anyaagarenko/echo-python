@@ -9,14 +9,14 @@ why:
 
 bad:
 
-  create_user("ada", "lovelace", True)
-  client.request("GET", url)
+  paint("red", "blue", True)
+  send("GET", path)
 
 
 good:
 
-  create_user(first="ada", last="lovelace", active=True)
-  client.request(method="GET", url=url)
+  paint(primary="red", secondary="blue", filled=True)
+  send(method="GET", path=path)
 
 
 configure in pyproject.toml:
