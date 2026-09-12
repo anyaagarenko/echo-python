@@ -12,6 +12,7 @@ bad:
   [2, 1, "b", "a"]
   ("a", 1)
   {"a": 1, 1: "b"}
+  {1, "b", "a"}
 
 
 good:
@@ -19,3 +20,10 @@ good:
   [1, 2, "a", "b"]
   (1, "a")
   {1: "b", "a": 1}
+  {1, "a", "b"}
+
+
+skipped:
+
+  type annotations
+  pytest.mark.parametrize / pytest.param argument trees

@@ -11,6 +11,7 @@ bad:
   [100500, 4911]
   (2, 1)
   {2: "a", 1: "b"}
+  {2, 1}
 
 
 good:
@@ -18,3 +19,10 @@ good:
   [4911, 100500]
   (-2, -1, 0, 3)
   {1: "b", 2: "a"}
+  {1, 2}
+
+
+skipped:
+
+  type annotations
+  pytest.mark.parametrize / pytest.param argument trees
