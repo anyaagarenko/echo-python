@@ -19,17 +19,6 @@ good:
   client.request(method="GET", url=url)
 
 
-allowed without keywords:
-
-  one positional arg (or self/cls plus one)
-  starred args are not counted
-  real builtins (isinstance, round, int, zip, ...)
-  builtins.isinstance(...)
-  mapping .get / .pop / .setdefault with exactly two positionals
-    data.get("key", None)
-    kwargs.setdefault("timeout", 1)
-
-
 not allowed as builtins when shadowed or imported:
 
   isinstance = check
