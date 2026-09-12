@@ -14,12 +14,11 @@ use as:
 
 rules:
 
-  ECHO001 - calls with multiple args must use keywords (self/cls exempt;
-    builtins and mapping get/pop/setdefault with two args allowed)
-  ECHO002 - mixed lists: numbers by value, then words alphabetically
-  ECHO003 - numeric lists sorted by value
-  ECHO004 - word/name lists sorted alphabetically
-  ECHO005 - params one per line when more than one (self/cls not counted)
+  ECHO001 - use keyword arguments for calls with multiple positional args
+  ECHO002 - mixed list is not sorted (numbers then words)
+  ECHO003 - numbers list is not sorted
+  ECHO004 - words list is not sorted
+  ECHO005 - put each parameter on its own line when a function has more than one parameter
 
 
 cli:
