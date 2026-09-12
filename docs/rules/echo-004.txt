@@ -1,0 +1,20 @@
+ECHO004 - words list is not sorted
+
+
+why:
+
+  word and name lists are easier to scan when sorted alphabetically.
+
+
+bad:
+
+  ["b", "a"]
+  [agency, advertiser, hyper]
+  ["password", "email"]
+
+
+good:
+
+  ["a", "b"]
+  [advertiser, agency, hyper]
+  ["email", "password"]
