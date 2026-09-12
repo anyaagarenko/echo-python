@@ -23,23 +23,9 @@ impl Signature {
         }
     }
 
-    pub(super) fn from_slots(slots: &[Slot]) -> Self {
-        Self {
-            slots: slots.to_vec(),
-            var_positional: false,
-        }
-    }
-
     pub(super) fn positional_only(count: usize) -> Self {
         Self {
             slots: vec![Slot::PosOnly; count],
-            var_positional: false,
-        }
-    }
-
-    pub(super) fn keyword_capable(count: usize) -> Self {
-        Self {
-            slots: vec![Slot::Normal; count],
             var_positional: false,
         }
     }
@@ -77,7 +63,11 @@ mod tests {
 
     #[test]
     fn normal_binds_keywords() {
-        assert!(Signature::keyword_capable(2).binds_keyword_capable(2));
+        let signature = Signature {
+            slots: vec![Slot::Normal, Slot::Normal],
+            var_positional: false,
+        };
+        assert!(signature.binds_keyword_capable(2));
     }
 
     #[test]
@@ -87,7 +77,10 @@ mod tests {
 
     #[test]
     fn mixed_second_slot_can_bind() {
-        let signature = Signature::from_slots(&[Slot::PosOnly, Slot::Normal]);
+        let signature = Signature {
+            slots: vec![Slot::PosOnly, Slot::Normal],
+            var_positional: false,
+        };
         assert!(signature.binds_keyword_capable(2));
         assert!(!signature.binds_keyword_capable(1));
     }
