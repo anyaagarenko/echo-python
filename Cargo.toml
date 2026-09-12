@@ -1,6 +1,6 @@
 [package]
 categories = ["command-line-utilities", "development-tools"]
-description = "A fast Python linter with custom rules"
+description = "fast style helper for python projects (ruff compatible)"
 edition = "2024"
 keywords = ["cli", "linter", "python", "rust"]
 license = "MIT"
