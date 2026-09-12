@@ -1,6 +1,6 @@
 use rustpython_parser::ast;
 
-use super::signature::{Signature, Slot};
+use super::signature::Signature;
 use crate::bindings::Bindings;
 
 pub(super) fn resolve(bindings: &Bindings, expr: &ast::ExprCall) -> Option<Signature> {
@@ -16,7 +16,7 @@ pub(super) fn resolve(bindings: &Bindings, expr: &ast::ExprCall) -> Option<Signa
 }
 
 fn builtin_signature(bindings: &Bindings, expr: &ast::ExprCall) -> Option<Signature> {
-    for name in BUILTIN_NAMES {
+    for name in POSITIONAL_BUILTINS {
         if bindings.match_builtin_expr(expr, name) {
             return Some(signature_for_builtin(name));
         }
@@ -40,25 +40,21 @@ fn method_signature(expr: &ast::ExprCall) -> Option<Signature> {
 
 fn signature_for_builtin(name: &str) -> Signature {
     match name {
-        "enumerate" | "open" | "round" => Signature::keyword_capable(2),
-        "int" | "sum" => Signature::from_slots(&[Slot::PosOnly, Slot::Normal]),
         "print" | "max" | "min" | "zip" | "map" | "filter" => Signature::varargs(),
         _ => Signature::positional_only(2),
     }
 }
 
-const BUILTIN_NAMES: &[&str] = &[
+const POSITIONAL_BUILTINS: &[&str] = &[
     "abs",
     "all",
     "any",
     "bool",
     "dict",
-    "enumerate",
     "filter",
     "float",
     "getattr",
     "hasattr",
-    "int",
     "isinstance",
     "issubclass",
     "len",
@@ -66,16 +62,13 @@ const BUILTIN_NAMES: &[&str] = &[
     "map",
     "max",
     "min",
-    "open",
     "print",
     "range",
     "reversed",
-    "round",
     "set",
     "setattr",
     "sorted",
     "str",
-    "sum",
     "tuple",
     "zip",
 ];
