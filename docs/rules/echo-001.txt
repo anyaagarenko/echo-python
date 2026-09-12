@@ -25,17 +25,20 @@ good:
   round(number=1.234, ndigits=2)
 
 
-skipped (keywords are not possible):
+skipped when keywords are not possible:
 
-  builtins with positional-only / *args APIs
+  positional-only parameters
     isinstance(1, int)
-    print(1, 2)
-    max(1, 2)
-  mapping get / pop / setdefault with two positionals
+    def f(a, b, /): ...
     data.get("key", None)
-  django queryset *args / *fields style calls
-    User.objects.filter(Q(a), Q(b))
+
+  *args parameters
+    print(1, 2)
+    def f(*args): ...
     qs.select_related("a", "b")
+
+
+unknown callees are treated as keyword-capable.
 
 
 configure in pyproject.toml:

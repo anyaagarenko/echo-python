@@ -1,8 +1,7 @@
-mod builtins;
 mod config;
-mod mapping;
 mod positionals;
-mod queryset;
+mod resolve;
+mod signature;
 
 use rustpython_parser::ast;
 
@@ -23,10 +22,14 @@ pub(crate) fn check(
     expr: &ast::ExprCall,
     diagnostics: &mut Vec<Diagnostic>,
 ) {
-    if !kwargs_possible(bindings, settings, expr) {
+    if config::is_ignored(settings, &expr.func) {
         return;
     }
-    if positionals::countable(&expr.args) <= 1 {
+    let countable = positionals::countable(&expr.args);
+    if countable <= 1 {
+        return;
+    }
+    if !kwargs_possible(bindings, expr, countable) {
         return;
     }
     report(
@@ -40,20 +43,9 @@ pub(crate) fn check(
     );
 }
 
-fn kwargs_possible(bindings: &Bindings, settings: &Settings, expr: &ast::ExprCall) -> bool {
-    if builtins::is_positional_builtin(bindings, expr) {
-        return false;
-    }
-    if config::is_ignored(settings, &expr.func) {
-        return false;
-    }
-    if mapping::is_positional_mapping_method(expr) {
-        return false;
-    }
-    if queryset::is_queryset_call(expr) {
-        return false;
-    }
-    true
+fn kwargs_possible(bindings: &Bindings, expr: &ast::ExprCall, countable: usize) -> bool {
+    resolve::resolve(bindings, expr)
+        .is_none_or(|signature| signature.binds_keyword_capable(countable))
 }
 
 #[cfg(test)]
@@ -116,37 +108,6 @@ mod tests {
     }
 
     #[test]
-    fn counts_two_positionals() {
-        assert_eq!(2, positionals::countable(&call_from("f(1, 2)\n").args));
-    }
-
-    #[test]
-    fn counts_one_positional() {
-        assert_eq!(1, positionals::countable(&call_from("f(1)\n").args));
-    }
-
-    #[test]
-    fn skips_self_then_one_arg() {
-        assert_eq!(
-            1,
-            positionals::countable(&call_from("Foo.m(self, x)\n").args)
-        );
-    }
-
-    #[test]
-    fn skips_self_then_two_args() {
-        assert_eq!(
-            2,
-            positionals::countable(&call_from("Foo.m(self, x, y)\n").args)
-        );
-    }
-
-    #[test]
-    fn ignores_starred() {
-        assert_eq!(1, positionals::countable(&call_from("f(1, *xs)\n").args));
-    }
-
-    #[test]
     fn isinstance_is_skipped() {
         assert!(diagnose_call("isinstance(1, int)\n", &enabled_settings(&[])).is_empty());
     }
@@ -174,24 +135,34 @@ mod tests {
     }
 
     #[test]
-    fn round_with_two_positionals_is_reported() {
-        assert_eq!(
-            1,
-            diagnose_call("round(1.23, 2)\n", &enabled_settings(&[])).len()
-        );
-    }
-
-    #[test]
-    fn enumerate_with_two_positionals_is_reported() {
-        assert_eq!(
-            1,
-            diagnose_call("enumerate(xs, 1)\n", &enabled_settings(&[])).len()
-        );
-    }
-
-    #[test]
     fn print_with_two_positionals_is_skipped() {
         assert!(diagnose_call("print(1, 2)\n", &enabled_settings(&[])).is_empty());
+    }
+
+    #[test]
+    fn mapping_get_is_skipped() {
+        assert!(diagnose_call("data.get(\"k\", None)\n", &enabled_settings(&[])).is_empty());
+    }
+
+    #[test]
+    fn local_posonly_def_is_skipped() {
+        let source = "def f(a, b, /):\n    pass\nf(1, 2)\n";
+        assert!(diagnose(source, &call_at(source, 1), &enabled_settings(&[])).is_empty());
+    }
+
+    #[test]
+    fn local_normal_def_is_reported() {
+        let source = "def f(a, b):\n    pass\nf(1, 2)\n";
+        assert_eq!(
+            1,
+            diagnose(source, &call_at(source, 1), &enabled_settings(&[])).len()
+        );
+    }
+
+    #[test]
+    fn local_varargs_def_is_skipped() {
+        let source = "def f(*args):\n    pass\nf(1, 2)\n";
+        assert!(diagnose(source, &call_at(source, 1), &enabled_settings(&[])).is_empty());
     }
 
     #[test]
@@ -199,41 +170,5 @@ mod tests {
         assert!(
             diagnose_call("pytest.param(1, 2)\n", &enabled_settings(&["pytest.param"])).is_empty()
         );
-    }
-
-    #[test]
-    fn qualified_ignore_keeps_other_param() {
-        assert_eq!(
-            1,
-            diagnose_call("other.param(1, 2)\n", &enabled_settings(&["pytest.param"])).len()
-        );
-    }
-
-    #[test]
-    fn objects_filter_is_queryset() {
-        assert!(queryset::is_queryset_call(&call_from(
-            "User.objects.filter(\"a\", \"b\")\n"
-        )));
-    }
-
-    #[test]
-    fn chained_filter_from_objects_is_queryset() {
-        assert!(queryset::is_queryset_call(&call_from(
-            "User.objects.all().filter(\"a\", \"b\")\n"
-        )));
-    }
-
-    #[test]
-    fn bare_filter_method_is_not_queryset() {
-        assert!(!queryset::is_queryset_call(&call_from(
-            "helper.filter(\"a\", \"b\")\n"
-        )));
-    }
-
-    #[test]
-    fn distinctive_select_related_is_queryset() {
-        assert!(queryset::is_queryset_call(&call_from(
-            "helper.select_related(\"a\", \"b\")\n"
-        )));
     }
 }

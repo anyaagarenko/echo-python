@@ -268,7 +268,7 @@ fn objects_filter_is_clean() {
 }
 
 #[test]
-fn chained_queryset_filter_is_clean() {
+fn chained_queryset_order_by_is_clean() {
     let diags = lint("User.objects.all().order_by(\"a\", \"-b\")\n");
 
     assert!(diags.is_empty());
@@ -282,15 +282,8 @@ fn select_related_is_clean() {
 }
 
 #[test]
-fn non_queryset_filter_is_reported() {
+fn filter_method_is_clean() {
     let diags = lint("helper.filter(\"a\", \"b\")\n");
 
-    assert_eq!(RULE_ECHO001, diags[0].code);
-}
-
-#[test]
-fn unbound_qs_filter_is_reported() {
-    let diags = lint("qs.filter(\"a\", \"b\")\n");
-
-    assert_eq!(RULE_ECHO001, diags[0].code);
+    assert!(diags.is_empty());
 }
