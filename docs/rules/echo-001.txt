@@ -9,14 +9,14 @@ why:
 
 bad:
 
-  f("b", "a", True)
-  g("x", y)
+  create_user("ada", "lovelace", True)
+  send("GET", path)
 
 
 good:
 
-  f(left="b", right="a", flag=True)
-  g(kind="x", target=y)
+  create_user(first="ada", last="lovelace", active=True)
+  send(method="GET", path=path)
 
 
 configure in pyproject.toml:
