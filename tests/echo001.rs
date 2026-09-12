@@ -131,15 +131,29 @@ fn annotated_class_dict_get_is_clean() {
 }
 
 #[test]
-fn round_is_clean() {
+fn round_is_reported() {
     let diags = lint("round(1.5, 2)\n");
 
-    assert!(diags.is_empty());
+    assert_eq!(RULE_ECHO001, diags[0].code);
 }
 
 #[test]
-fn int_is_clean() {
+fn int_is_reported() {
     let diags = lint("int(\"1\", 10)\n");
+
+    assert_eq!(RULE_ECHO001, diags[0].code);
+}
+
+#[test]
+fn open_is_reported() {
+    let diags = lint("open(\"a\", \"r\")\n");
+
+    assert_eq!(RULE_ECHO001, diags[0].code);
+}
+
+#[test]
+fn print_is_clean() {
+    let diags = lint("print(1, 2)\n");
 
     assert!(diags.is_empty());
 }
@@ -219,9 +233,9 @@ fn ignore_rule_skips() {
 
 #[test]
 fn ignore_from_pyproject() {
-    let pyproject = "[tool.echo-python.echo001]\nignore = [\"print\"]\n";
+    let pyproject = "[tool.echo-python.echo001]\nignore = [\"helper\"]\n";
 
-    let diags = lint_project(pyproject, "print(1, 2)\n");
+    let diags = lint_project(pyproject, "helper(1, 2)\n");
 
     assert!(diags.is_empty());
 }
@@ -254,7 +268,7 @@ fn objects_filter_is_clean() {
 }
 
 #[test]
-fn chained_queryset_filter_is_clean() {
+fn chained_queryset_order_by_is_clean() {
     let diags = lint("User.objects.all().order_by(\"a\", \"-b\")\n");
 
     assert!(diags.is_empty());
@@ -268,15 +282,8 @@ fn select_related_is_clean() {
 }
 
 #[test]
-fn non_queryset_filter_is_reported() {
+fn filter_method_is_clean() {
     let diags = lint("helper.filter(\"a\", \"b\")\n");
 
-    assert_eq!(RULE_ECHO001, diags[0].code);
-}
-
-#[test]
-fn unbound_qs_filter_is_reported() {
-    let diags = lint("qs.filter(\"a\", \"b\")\n");
-
-    assert_eq!(RULE_ECHO001, diags[0].code);
+    assert!(diags.is_empty());
 }

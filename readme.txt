@@ -17,7 +17,7 @@ cli:
 
 rules:
 
-  ECHO001 - use keyword arguments for calls with multiple positional args
+  ECHO001 - use keyword arguments for multi-arg calls when keywords are possible
             https://github.com/anyaagarenko/echo-python/blob/main/docs/rules/echo-001.txt
   ECHO002 - mixed literals are not sorted (numbers then words)
             https://github.com/anyaagarenko/echo-python/blob/main/docs/rules/echo-002.txt

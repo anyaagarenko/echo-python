@@ -3,9 +3,17 @@ use std::collections::{HashMap, HashSet};
 use rustpython_parser::ast::{self, Visitor};
 use rustpython_parser::text_size::TextSize;
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub(crate) struct FunctionShape {
+    pub(crate) posonly: usize,
+    pub(crate) args: usize,
+    pub(crate) vararg: bool,
+}
+
 #[derive(Debug)]
 struct Scope {
     names: HashSet<String>,
+    functions: HashMap<String, FunctionShape>,
     parent: Option<usize>,
 }
 
@@ -30,6 +38,26 @@ impl Bindings {
             return bare_or_builtins_attr(call.func.as_ref(), builtin);
         };
         match_builtin_expr(call.func.as_ref(), builtin, *scope, self)
+    }
+
+    pub(crate) fn function_shape(&self, call: &ast::ExprCall) -> Option<FunctionShape> {
+        let ast::Expr::Name(name) = call.func.as_ref() else {
+            return None;
+        };
+        let scope = self.call_scopes.get(&call.range.start())?;
+        self.lookup_function(name.id.as_str(), *scope)
+    }
+
+    fn lookup_function(&self, name: &str, mut scope: usize) -> Option<FunctionShape> {
+        loop {
+            if let Some(shape) = self.scopes[scope].functions.get(name) {
+                return Some(*shape);
+            }
+            if self.scopes[scope].names.contains(name) {
+                return None;
+            }
+            scope = self.scopes[scope].parent?;
+        }
     }
 
     fn is_unbound(&self, name: &str, mut scope: usize) -> bool {
@@ -57,6 +85,7 @@ impl Collector {
                 call_scopes: HashMap::new(),
                 scopes: vec![Scope {
                     names: HashSet::new(),
+                    functions: HashMap::new(),
                     parent: None,
                 }],
             },
@@ -68,6 +97,7 @@ impl Collector {
         let parent = self.current_scope;
         self.bindings.scopes.push(Scope {
             names: HashSet::new(),
+            functions: HashMap::new(),
             parent: Some(parent),
         });
         self.current_scope = self.bindings.scopes.len() - 1;
@@ -83,6 +113,18 @@ impl Collector {
         self.bindings.scopes[self.current_scope]
             .names
             .insert(name.to_string());
+    }
+
+    fn bind_function(&mut self, name: &str, arguments: &ast::Arguments) {
+        self.bind(name);
+        self.bindings.scopes[self.current_scope].functions.insert(
+            name.to_string(),
+            FunctionShape {
+                posonly: arguments.posonlyargs.len(),
+                args: arguments.args.len(),
+                vararg: arguments.vararg.is_some(),
+            },
+        );
     }
 
     fn bind_arguments(&mut self, arguments: &ast::Arguments) {
@@ -147,7 +189,7 @@ impl Visitor for Collector {
     }
 
     fn visit_stmt_async_function_def(&mut self, node: ast::StmtAsyncFunctionDef) {
-        self.bind(node.name.as_str());
+        self.bind_function(node.name.as_str(), &node.args);
         self.visit_function_outer(
             &node.args,
             &node.decorator_list,
@@ -184,7 +226,7 @@ impl Visitor for Collector {
     }
 
     fn visit_stmt_function_def(&mut self, node: ast::StmtFunctionDef) {
-        self.bind(node.name.as_str());
+        self.bind_function(node.name.as_str(), &node.args);
         self.visit_function_outer(
             &node.args,
             &node.decorator_list,
