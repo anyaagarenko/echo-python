@@ -59,6 +59,9 @@ pub(crate) fn check(
     if is_mapping_method(expr) {
         return;
     }
+    if is_queryset_call(expr) {
+        return;
+    }
     if countable_positionals(&expr.args) <= 1 {
         return;
     }
@@ -79,6 +82,62 @@ fn is_mapping_method(expr: &ast::ExprCall) -> bool {
     };
     matches!(attribute.attr.as_str(), "get" | "pop" | "setdefault")
         && countable_positionals(&expr.args) == 2
+}
+
+fn is_queryset_call(expr: &ast::ExprCall) -> bool {
+    let ast::Expr::Attribute(attribute) = expr.func.as_ref() else {
+        return false;
+    };
+    let method = attribute.attr.as_str();
+    if is_distinctive_queryset_method(method) {
+        return true;
+    }
+    is_ambiguous_queryset_method(method) && is_queryset_receiver(attribute.value.as_ref())
+}
+
+fn is_queryset_receiver(expr: &ast::Expr) -> bool {
+    match expr {
+        ast::Expr::Attribute(attribute) if attribute.attr.as_str() == "objects" => true,
+        ast::Expr::Call(call) => is_queryset_call(call),
+        _ => false,
+    }
+}
+
+fn is_distinctive_queryset_method(method: &str) -> bool {
+    matches!(
+        method,
+        "alias"
+            | "annotate"
+            | "dates"
+            | "datetimes"
+            | "defer"
+            | "only"
+            | "prefetch_related"
+            | "select_for_update"
+            | "select_related"
+            | "values"
+            | "values_list"
+    )
+}
+
+fn is_ambiguous_queryset_method(method: &str) -> bool {
+    matches!(
+        method,
+        "aggregate"
+            | "all"
+            | "create"
+            | "difference"
+            | "distinct"
+            | "exclude"
+            | "filter"
+            | "get"
+            | "intersection"
+            | "none"
+            | "order_by"
+            | "reverse"
+            | "union"
+            | "update"
+    )
 }
 
 fn is_ignored_builtin(bindings: &Bindings, expr: &ast::ExprCall) -> bool {
@@ -332,5 +391,33 @@ mod tests {
         let diagnostics = diagnose_call("print(1, 2)\n", &settings);
 
         assert!(diagnostics.is_empty());
+    }
+
+    #[test]
+    fn objects_filter_is_queryset() {
+        let call = call_from("User.objects.filter(\"a\", \"b\")\n");
+
+        assert!(is_queryset_call(&call));
+    }
+
+    #[test]
+    fn chained_filter_from_objects_is_queryset() {
+        let call = call_from("User.objects.all().filter(\"a\", \"b\")\n");
+
+        assert!(is_queryset_call(&call));
+    }
+
+    #[test]
+    fn bare_filter_method_is_not_queryset() {
+        let call = call_from("helper.filter(\"a\", \"b\")\n");
+
+        assert!(!is_queryset_call(&call));
+    }
+
+    #[test]
+    fn distinctive_select_related_is_queryset() {
+        let call = call_from("helper.select_related(\"a\", \"b\")\n");
+
+        assert!(is_queryset_call(&call));
     }
 }

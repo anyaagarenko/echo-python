@@ -245,3 +245,38 @@ fn lint_ignore_from_pyproject() {
 
     assert!(diags.is_empty());
 }
+
+#[test]
+fn objects_filter_is_clean() {
+    let diags = lint("User.objects.filter(\"a\", \"b\")\n");
+
+    assert!(diags.is_empty());
+}
+
+#[test]
+fn chained_queryset_filter_is_clean() {
+    let diags = lint("User.objects.all().order_by(\"a\", \"-b\")\n");
+
+    assert!(diags.is_empty());
+}
+
+#[test]
+fn select_related_is_clean() {
+    let diags = lint("qs.select_related(\"a\", \"b\")\n");
+
+    assert!(diags.is_empty());
+}
+
+#[test]
+fn non_queryset_filter_is_reported() {
+    let diags = lint("helper.filter(\"a\", \"b\")\n");
+
+    assert_eq!(RULE_ECHO001, diags[0].code);
+}
+
+#[test]
+fn unbound_qs_filter_is_reported() {
+    let diags = lint("qs.filter(\"a\", \"b\")\n");
+
+    assert_eq!(RULE_ECHO001, diags[0].code);
+}
