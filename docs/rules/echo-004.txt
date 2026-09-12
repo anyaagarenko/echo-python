@@ -9,12 +9,12 @@ why:
 bad:
 
   ["b", "a"]
-  [agency, advertiser, hyper]
+  [zeta, alpha, beta]
   ["password", "email"]
 
 
 good:
 
   ["a", "b"]
-  [advertiser, agency, hyper]
+  [alpha, beta, zeta]
   ["email", "password"]
