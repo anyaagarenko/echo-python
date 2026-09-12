@@ -13,14 +13,14 @@ fmt:
 	cargo fmt
 	cargo clippy --all-targets --fix --allow-dirty --allow-staged
 	mise exec -- toml-sort $(tomls)
-	@if [ -n "$(yamlfiles)" ]; then $(yamlsort) --input $(yamlfiles) --lineWidth -1; fi
+	@$(yamlsort) --input $(yamlfiles) --lineWidth -1
 	make sort-dotfiles
 
 check:
 	cargo fmt -- --check
 	cargo clippy --all-targets
 	mise exec -- toml-sort $(tomls) --check
-	@if [ -n "$(yamlfiles)" ]; then $(yamlsort) --check --input $(yamlfiles) --lineWidth -1; fi
+	@$(yamlsort) --check --input $(yamlfiles) --lineWidth -1
 
 test:
 	cargo test
