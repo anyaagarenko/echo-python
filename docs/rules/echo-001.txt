@@ -39,30 +39,11 @@ not allowed as builtins when shadowed or imported:
   isinstance(1, int)
 
 
-use:
-
-  echo-python check --select ECHO001 .
-  echo-python check --ignore ECHO001 .
-
-
 configure in pyproject.toml:
 
   [tool.echo-python.lint]
   ignore = ["ECHO001"]
   select = ["ECHO001"]
 
-  [tool.echo-python.calls-use-kwargs]
-  ignore = ["path", "parametrize", "pytest.param", "register", "spy"]
-
-
-ignore matches the short name or a dotted path:
-
-  path                 django urls path(...)
-  parametrize          pytest.mark.parametrize
-  pytest.param         only pytest.param, not other.param
-  values_list          qs.filter(...).values_list(...)
-
-
-ignore a finding:
-
-  f(1, 2)  # noqa: ECHO001
+  [tool.echo-python.echo001]
+  ignore = ["pytest.mark.parametrize", "pytest.param"]

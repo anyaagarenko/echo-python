@@ -1,15 +1,18 @@
-style helper for python projects (ruff compatible)
+fast style helper for python projects (ruff compatible)
 
 
 install in a project:
 
-  mise use github:anyaagarenko/echo-python
+  pip install echo-python
 
 
-use as:
+cli:
 
-  mise exec -- echo-python check .
-  mise exec -- echo-python check path/to/file.py
+  echo-python check .
+  echo-python check path/to/file.py
+  echo-python check --extend-select ECHO001 .
+  echo-python check --ignore ECHO001 .
+  echo-python check --select ECHO001 .
 
 
 rules:
@@ -22,13 +25,6 @@ rules:
   ECHO005 - put each parameter on its own line when a function has more than one parameter
 
 
-cli:
-
-  mise exec -- echo-python check --select ECHO003 .
-  mise exec -- echo-python check --ignore ECHO001 .
-  mise exec -- echo-python check --extend-select ECHO002 .
-
-
 configure in pyproject.toml:
 
   [tool.echo-python.lint]
@@ -36,13 +32,13 @@ configure in pyproject.toml:
   ignore = ["ECHO001"]
   select = ["ALL"]
 
-  [tool.echo-python.calls-use-kwargs]
-  ignore = ["path", "parametrize", "pytest.param", "register", "spy"]
+  [tool.echo-python.echo001]
+  ignore = ["pytest.mark.parametrize", "pytest.param"]
 
 
 ignore a finding:
 
-  use noqa
+  f(1, 2)  # noqa: ECHO001
 
 
 development:
@@ -52,3 +48,9 @@ development:
 
 
 contributions welcome
+
+
+publishing:
+
+  bump version in Cargo.toml on main
+  github → actions → pypi → run workflow (branch: main)

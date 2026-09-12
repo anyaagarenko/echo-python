@@ -12,7 +12,7 @@ pub use check::{CheckResult, check_path, check_paths, check_source};
 pub use diagnostic::Diagnostic;
 pub use settings::CheckOptions;
 
-pub const RULE_CALLS_USE_KWARGS: &str = "ECHO001";
+pub const RULE_ECHO001: &str = "ECHO001";
 pub const RULE_MIXED_LIST_SORTED: &str = "ECHO002";
 pub const RULE_NUMBERS_LIST_SORTED: &str = "ECHO003";
 pub const RULE_WORDS_LIST_SORTED: &str = "ECHO004";

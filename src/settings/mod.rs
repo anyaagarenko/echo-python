@@ -10,11 +10,11 @@ pub(crate) use load::load_for_path;
 #[derive(Clone, Debug, Default)]
 pub(crate) struct Settings {
     pub(crate) enabled: HashSet<String>,
-    pub(crate) calls_use_kwargs: CallsUseKwargsSettings,
+    pub(crate) echo001: Echo001Settings,
 }
 
 #[derive(Clone, Debug, Default)]
-pub(crate) struct CallsUseKwargsSettings {
+pub(crate) struct Echo001Settings {
     pub(crate) ignore: HashSet<String>,
 }
 
@@ -24,7 +24,7 @@ impl Settings {
     }
 }
 
-impl CallsUseKwargsSettings {
+impl Echo001Settings {
     pub(crate) fn ignores(&self, name: &str) -> bool {
         self.ignore.contains(name)
     }
