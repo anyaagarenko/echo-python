@@ -10,13 +10,13 @@ why:
 bad:
 
   create_user("ada", "lovelace", True)
-  send("GET", path)
+  client.request("GET", url)
 
 
 good:
 
   create_user(first="ada", last="lovelace", active=True)
-  send(method="GET", path=path)
+  client.request(method="GET", url=url)
 
 
 configure in pyproject.toml:
