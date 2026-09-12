@@ -47,8 +47,10 @@ jobs:
           path: dist
       - name: install uv
         uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: false
       - name: publish to pypi
-        run: uv publish --trusted-publishing always --skip-existing dist/*
+        run: uv publish --trusted-publishing always --check-url https://pypi.org/simple/ dist/*
   sdist:
     runs-on: ubuntu-latest
     steps:
