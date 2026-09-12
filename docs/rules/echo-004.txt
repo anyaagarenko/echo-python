@@ -1,18 +1,29 @@
-ECHO004 - words list is not sorted
+ECHO004 - word literals are not sorted
 
 
 why:
 
-  word and name lists are easier to scan when sorted alphabetically.
+  word and name literal collections are easier to scan when sorted
+  alphabetically.
 
 
 bad:
 
   ["b", "a"]
-  [zeta, alpha, beta]
+  (zeta, alpha, beta)
+  {"b": 1, "a": 2}
+  {"b", "a"}
 
 
 good:
 
   ["a", "b"]
-  [alpha, beta, zeta]
+  (alpha, beta, zeta)
+  {"a": 2, "b": 1}
+  {"a", "b"}
+
+
+skipped:
+
+  type annotations
+  pytest.mark.parametrize / pytest.param argument trees

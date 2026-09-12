@@ -1,20 +1,28 @@
-ECHO003 - numbers list is not sorted
+ECHO003 - numeric literals are not sorted
 
 
 why:
 
-  numeric lists are easier to scan when values increase.
+  numeric literal collections are easier to scan when values increase.
 
 
 bad:
 
   [100500, 4911]
-  [2, 1]
-  [True, False]
+  (2, 1)
+  {2: "a", 1: "b"}
+  {2, 1}
 
 
 good:
 
   [4911, 100500]
-  [-2, -1, 0, 3]
-  [False, True]
+  (-2, -1, 0, 3)
+  {1: "b", 2: "a"}
+  {1, 2}
+
+
+skipped:
+
+  type annotations
+  pytest.mark.parametrize / pytest.param argument trees

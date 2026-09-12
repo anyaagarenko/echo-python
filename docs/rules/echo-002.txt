@@ -1,21 +1,29 @@
-ECHO002 - mixed list is not sorted (numbers then words)
+ECHO002 - mixed literals are not sorted (numbers then words)
 
 
 why:
 
-  mixed lists are easier to scan when numbers come first, then words,
-  and each group is sorted.
+  mixed literal collections are easier to scan when numbers come first,
+  then words, and each group is sorted.
 
 
 bad:
 
   [2, 1, "b", "a"]
-  ["a", 1]
-  [1, "b", "a"]
+  ("a", 1)
+  {"a": 1, 1: "b"}
+  {1, "b", "a"}
 
 
 good:
 
   [1, 2, "a", "b"]
-  [1, "a"]
-  [4911, 100500, "a"]
+  (1, "a")
+  {1: "b", "a": 1}
+  {1, "a", "b"}
+
+
+skipped:
+
+  type annotations
+  pytest.mark.parametrize / pytest.param argument trees
