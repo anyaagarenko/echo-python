@@ -1,0 +1,13 @@
+---
+description: Commit and update PRs after every change
+alwaysApply: true
+---
+
+# PR workflow
+
+- Before every commit, run `make mr` and fix failures.
+- One action = one commit. Do not batch unrelated changes.
+- After any change meant for review, commit and push to the open PR immediately.
+- If the current branch is `main`, create a new branch first with a short kebab-case name (one or two words, e.g. `pypi`, `fix-cli`).
+- Keep the PR description current: set it on create, and update it after every commit so it matches the full PR diff.
+- Do not leave reviewable work uncommitted on a PR branch.
