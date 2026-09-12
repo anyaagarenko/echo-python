@@ -16,4 +16,4 @@ pub const RULE_ECHO001: &str = "ECHO001";
 pub const RULE_MIXED_LIST_SORTED: &str = "ECHO002";
 pub const RULE_NUMBERS_LIST_SORTED: &str = "ECHO003";
 pub const RULE_WORDS_LIST_SORTED: &str = "ECHO004";
-pub const RULE_PARAMS_ONE_PER_LINE: &str = "ECHO005";
+pub const RULE_SORTED_KWONLY_PARAMS: &str = "ECHO006";
