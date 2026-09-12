@@ -4,7 +4,6 @@ fast style helper for python projects (ruff compatible)
 install in a project:
 
   pip install echo-python
-  uv add --dev echo-python
 
 
 cli:
