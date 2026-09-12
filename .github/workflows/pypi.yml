@@ -1,6 +1,6 @@
 jobs:
   linux:
-    runs-on: ${{ matrix.platform.runner }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - name: Build wheels
@@ -9,21 +9,14 @@ jobs:
           args: '--release --out dist --locked'
           manylinux: auto
           sccache: true
-          target: ${{ matrix.platform.target }}
+          target: x86_64
       - name: Upload wheels
         uses: actions/upload-artifact@v6
         with:
-          name: wheels-linux-${{ matrix.platform.target }}
+          name: wheels-linux-x86_64
           path: dist
-    strategy:
-      matrix:
-        platform:
-          - runner: ubuntu-latest
-            target: aarch64
-          - runner: ubuntu-latest
-            target: x86_64
   macos:
-    runs-on: ${{ matrix.platform.runner }}
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v6
       - name: Build wheels
@@ -31,26 +24,18 @@ jobs:
         with:
           args: '--release --out dist --locked'
           sccache: true
-          target: ${{ matrix.platform.target }}
+          target: aarch64
       - name: Upload wheels
         uses: actions/upload-artifact@v6
         with:
-          name: wheels-macos-${{ matrix.platform.target }}
+          name: wheels-macos-aarch64
           path: dist
-    strategy:
-      matrix:
-        platform:
-          - runner: macos-latest
-            target: aarch64
-          - runner: macos-latest
-            target: x86_64
   release:
     name: Publish
     needs:
       - linux
       - macos
       - sdist
-      - windows
     permissions:
       id-token: write
     runs-on: ubuntu-latest
@@ -77,26 +62,6 @@ jobs:
         with:
           name: wheels-sdist
           path: dist
-  windows:
-    runs-on: ${{ matrix.platform.runner }}
-    steps:
-      - uses: actions/checkout@v6
-      - name: Build wheels
-        uses: PyO3/maturin-action@v1
-        with:
-          args: '--release --out dist --locked'
-          sccache: true
-          target: ${{ matrix.platform.target }}
-      - name: Upload wheels
-        uses: actions/upload-artifact@v6
-        with:
-          name: wheels-windows-${{ matrix.platform.target }}
-          path: dist
-    strategy:
-      matrix:
-        platform:
-          - runner: windows-latest
-            target: x86_64
 name: PyPI
 'on':
   push:
