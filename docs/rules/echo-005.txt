@@ -1,4 +1,4 @@
-ECHO006 - keyword-only parameters are not sorted
+ECHO005 - keyword-only parameters are not sorted
 
 
 why:

@@ -33,5 +33,5 @@ fn positionals_with_unsorted_kwonly_are_reported() {
 
 #[test]
 fn noqa_suppresses() {
-    assert!(lint("def f(*, b, a):  # noqa: ECHO006\n    pass\n").is_empty());
+    assert!(lint("def f(*, b, a):  # noqa: ECHO005\n    pass\n").is_empty());
 }

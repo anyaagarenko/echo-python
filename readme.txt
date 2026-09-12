@@ -25,8 +25,8 @@ rules:
             https://github.com/anyaagarenko/echo-python/blob/main/docs/rules/echo-003.txt
   ECHO004 - word literals are not sorted
             https://github.com/anyaagarenko/echo-python/blob/main/docs/rules/echo-004.txt
-  ECHO006 - keyword-only parameters are not sorted
-            https://github.com/anyaagarenko/echo-python/blob/main/docs/rules/echo-006.txt
+  ECHO005 - keyword-only parameters are not sorted
+            https://github.com/anyaagarenko/echo-python/blob/main/docs/rules/echo-005.txt
 
 
 configure in pyproject.toml:
