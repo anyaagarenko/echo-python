@@ -43,32 +43,31 @@ fn dict_pop_is_clean() {
 }
 
 #[test]
-fn custom_get_is_reported() {
-    assert_eq!(
-        RULE_CALLS_USE_KWARGS,
-        lint("repository.get(\"key\", None)\n")[0].code
-    );
+fn unknown_receiver_get_is_clean() {
+    assert!(lint("repository.get(\"key\", None)\n").is_empty());
 }
 
 #[test]
-fn custom_pop_is_reported() {
-    assert_eq!(
-        RULE_CALLS_USE_KWARGS,
-        lint("queue.pop(\"key\", None)\n")[0].code
-    );
+fn unknown_receiver_pop_is_clean() {
+    assert!(lint("queue.pop(\"key\", None)\n").is_empty());
+}
+
+#[test]
+fn setdefault_is_clean() {
+    assert!(lint("kwargs.setdefault(\"timeout\", 1)\n").is_empty());
 }
 
 #[test]
 fn decorator_uses_outer_scope() {
-    let source = "repository = object()\n@decorate(repository.get(\"key\", None))\ndef f(repository: dict):\n    pass\n";
+    let source = "repository = object()\n@decorate(repository.fetch(\"key\", None))\ndef f(repository: dict):\n    pass\n";
     assert_eq!(RULE_CALLS_USE_KWARGS, lint(source)[0].code);
 }
 
 #[test]
-fn other_dict_method_is_reported() {
+fn other_method_is_reported() {
     assert_eq!(
         RULE_CALLS_USE_KWARGS,
-        lint("data = {}\ndata.setdefault(\"key\", None)\n")[0].code
+        lint("helper.combine(\"a\", \"b\")\n")[0].code
     );
 }
 
@@ -81,6 +80,16 @@ fn kwargs_get_is_clean() {
 fn annotated_class_dict_get_is_clean() {
     let source = "class C:\n    data: dict | None = None\n    def f(self):\n        self.data.get(\"key\", None)\n";
     assert!(lint(source).is_empty());
+}
+
+#[test]
+fn round_is_clean() {
+    assert!(lint("round(1.5, 2)\n").is_empty());
+}
+
+#[test]
+fn int_is_clean() {
+    assert!(lint("int(\"1\", 10)\n").is_empty());
 }
 
 #[test]

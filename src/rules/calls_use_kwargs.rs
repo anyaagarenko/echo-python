@@ -9,13 +9,35 @@ use crate::noqa::NoqaIndex;
 use crate::settings::Settings;
 
 const DEFAULT_BUILTINS: &[&str] = &[
+    "abs",
+    "all",
+    "any",
+    "bool",
+    "dict",
+    "enumerate",
+    "filter",
+    "float",
     "getattr",
     "hasattr",
+    "int",
     "isinstance",
     "issubclass",
+    "len",
+    "list",
+    "map",
     "max",
     "min",
+    "open",
+    "print",
+    "range",
+    "reversed",
+    "round",
+    "set",
     "setattr",
+    "sorted",
+    "str",
+    "sum",
+    "tuple",
     "zip",
 ];
 
@@ -34,7 +56,7 @@ pub(crate) fn check(
     if is_ignored_config(settings, &expr.func) {
         return;
     }
-    if is_positional_only_dict_method(bindings, expr) {
+    if is_mapping_method(expr) {
         return;
     }
     if countable_positionals(&expr.args) <= 1 {
@@ -51,12 +73,12 @@ pub(crate) fn check(
     );
 }
 
-fn is_positional_only_dict_method(bindings: &Bindings, expr: &ast::ExprCall) -> bool {
+fn is_mapping_method(expr: &ast::ExprCall) -> bool {
     let ast::Expr::Attribute(attribute) = expr.func.as_ref() else {
         return false;
     };
-
-    matches!(attribute.attr.as_str(), "get" | "pop") && bindings.receiver_is_dict(expr)
+    matches!(attribute.attr.as_str(), "get" | "pop" | "setdefault")
+        && countable_positionals(&expr.args) == 2
 }
 
 fn is_ignored_builtin(bindings: &Bindings, expr: &ast::ExprCall) -> bool {
