@@ -5,17 +5,15 @@ install in a project:
 
   pip install echo-python
   uv add --dev echo-python
-  mise use github:anyaagarenko/echo-python
 
 
 cli:
 
   echo-python check .
-  mise exec -- echo-python check .
-  mise exec -- echo-python check path/to/file.py
-  mise exec -- echo-python check --extend-select ECHO001 .
-  mise exec -- echo-python check --ignore ECHO001 .
-  mise exec -- echo-python check --select ECHO001 .
+  echo-python check path/to/file.py
+  echo-python check --extend-select ECHO001 .
+  echo-python check --ignore ECHO001 .
+  echo-python check --select ECHO001 .
 
 
 rules:
@@ -42,6 +40,3 @@ development:
 
   install mise https://github.com/jdx/mise#1-install-mise
   see Makefile
-  merging to main publishes to pypi
-  bump version in Cargo.toml when you want a new release
-  once: add a pypi trusted publisher for workflow pypi.yml (empty environment)
