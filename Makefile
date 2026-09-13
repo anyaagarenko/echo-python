@@ -1,5 +1,5 @@
 tomls = Cargo.toml mise.toml pyproject.toml rust-toolchain.toml rustfmt.toml
-yamlsort = npx --yes yaml-sort@3.0.0
+yamlsort = mise exec -- yaml-sort
 yamlfiles = $(shell find . \( -name "*.yaml" -o -name "*.yml" \) \
 	! -path "./.git/*" \
 	! -path "./node_modules/*" \
@@ -23,6 +23,8 @@ check:
 
 test:
 	cargo test
+
+ci: check test
 
 mr: fmt check test
 
