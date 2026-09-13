@@ -1,5 +1,4 @@
 tomls = Cargo.toml mise.toml pyproject.toml rust-toolchain.toml rustfmt.toml
-yamlsort = mise exec -- yaml-sort
 yamlfiles = $(shell find . \( -name "*.yaml" -o -name "*.yml" \) \
 	! -path "./.git/*" \
 	! -path "./node_modules/*" \
@@ -10,14 +9,14 @@ fmt:
 	cargo fmt
 	cargo clippy --all-targets --fix --allow-dirty --allow-staged
 	mise exec -- toml-sort $(tomls)
-	@$(yamlsort) --input $(yamlfiles) --lineWidth -1
+	mise exec -- yaml-sort --input $(yamlfiles) --lineWidth -1
 	make sort-dotfiles
 
 check:
 	cargo fmt -- --check
 	cargo clippy --all-targets
 	mise exec -- toml-sort $(tomls) --check
-	@$(yamlsort) --check --input $(yamlfiles) --lineWidth -1
+	mise exec -- yaml-sort --check --input $(yamlfiles) --lineWidth -1
 	mise exec -- actionlint
 	mise exec -- typos
 
