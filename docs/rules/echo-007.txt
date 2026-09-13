@@ -10,17 +10,17 @@ why:
 
 bad:
 
-  def total(items):
-      count = len(items)
+  def save(user):
+      user.validate()
 
-      return count
+      user.persist()
 
 
 good:
 
-  def total(items):
-      count = len(items)
-      return count
+  def save(user):
+      user.validate()
+      user.persist()
 
 
 configure in pyproject.toml:
