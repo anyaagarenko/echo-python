@@ -45,6 +45,14 @@ impl Default for Echo006Settings {
 }
 
 impl Echo006Settings {
+    pub(crate) fn from_config(names: Vec<String>, allow_msg: bool) -> Self {
+        let mut restricted: HashSet<String> = names.into_iter().collect();
+        if !allow_msg {
+            restricted.insert("msg".to_string());
+        }
+        Self { names: restricted }
+    }
+
     pub(crate) fn is_restricted(&self, name: &str) -> bool {
         self.names.contains(name)
     }

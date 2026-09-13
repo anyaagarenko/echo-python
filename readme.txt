@@ -37,7 +37,7 @@ configure in pyproject.toml:
   extend-select, ignore, select
 
   [tool.echo-python.echo006]
-  names
+  allow_msg, names
 
 
 ignore a finding:

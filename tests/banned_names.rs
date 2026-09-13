@@ -101,7 +101,7 @@ fn noqa_suppresses() {
 
 #[test]
 fn custom_names_from_pyproject() {
-    let pyproject = "[tool.echo-python.echo006]\nnames = [\"msg\", \"err\"]\n";
+    let pyproject = "[tool.echo-python.echo006]\nnames = [\"err\"]\n";
 
     let diags = lint_project(pyproject, "err = 1\n");
 
@@ -109,8 +109,18 @@ fn custom_names_from_pyproject() {
 }
 
 #[test]
-fn names_replace_default() {
+fn names_keep_default_msg() {
     let pyproject = "[tool.echo-python.echo006]\nnames = [\"err\"]\n";
+
+    assert_eq!(
+        RULE_BANNED_NAMES,
+        lint_project(pyproject, "msg = 1\n")[0].code
+    );
+}
+
+#[test]
+fn allow_msg_from_pyproject() {
+    let pyproject = "[tool.echo-python.echo006]\nallow_msg = true\n";
 
     assert!(lint_project(pyproject, "msg = 1\n").is_empty());
 }

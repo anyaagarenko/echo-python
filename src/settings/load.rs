@@ -39,22 +39,12 @@ struct Echo001Table {
     ignore: Vec<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Default, Deserialize)]
 struct Echo006Table {
-    #[serde(default = "default_banned_names")]
+    #[serde(default)]
     names: Vec<String>,
-}
-
-impl Default for Echo006Table {
-    fn default() -> Self {
-        Self {
-            names: default_banned_names(),
-        }
-    }
-}
-
-fn default_banned_names() -> Vec<String> {
-    vec!["msg".to_string()]
+    #[serde(default)]
+    allow_msg: bool,
 }
 
 pub(crate) fn load_for_path(path: &Path, options: &CheckOptions) -> Settings {
@@ -112,9 +102,7 @@ fn parse_pyproject(source: &str) -> Option<FileSettings> {
         echo001: Echo001Settings {
             ignore: echo001.ignore.into_iter().collect(),
         },
-        echo006: Echo006Settings {
-            names: echo006.names.into_iter().collect(),
-        },
+        echo006: Echo006Settings::from_config(echo006.names, echo006.allow_msg),
     })
 }
 
@@ -201,8 +189,8 @@ mod tests {
     }
 
     #[test]
-    fn parses_echo006_names() {
-        let source = "[tool.echo-python.echo006]\nnames = [\"msg\", \"err\"]\n";
+    fn parses_echo006_names_as_extra() {
+        let source = "[tool.echo-python.echo006]\nnames = [\"err\"]\n";
 
         let settings = parse_pyproject(source).unwrap();
 
@@ -211,8 +199,17 @@ mod tests {
     }
 
     #[test]
-    fn echo006_names_replace_default() {
-        let source = "[tool.echo-python.echo006]\nnames = [\"err\"]\n";
+    fn allow_msg_unmutes_default() {
+        let source = "[tool.echo-python.echo006]\nallow_msg = true\n";
+
+        let settings = parse_pyproject(source).unwrap();
+
+        assert!(!settings.echo006.is_restricted("msg"));
+    }
+
+    #[test]
+    fn allow_msg_keeps_extra_names() {
+        let source = "[tool.echo-python.echo006]\nnames = [\"err\"]\nallow_msg = true\n";
 
         let settings = parse_pyproject(source).unwrap();
 

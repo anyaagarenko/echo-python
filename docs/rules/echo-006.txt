@@ -3,40 +3,20 @@ ECHO006 - restricted variable names
 
 why:
 
-  some short names are too vague to keep around. ruff's exception
-  autofix always binds as `msg`, and that name cannot be configured,
-  so echo-python bans it by default.
-
-
-bad:
-
-  try:
-      work()
-  except Exception as msg:
-      log(msg)
-
-  msg = "hello"
-  def f(msg):
-      pass
-
-
-good:
-
-  try:
-      work()
-  except Exception as error:
-      log(error)
-
-  message = "hello"
-  def f(message):
-      pass
+  sometimes a project wants to forbid certain variable names.
+  this rule makes that configurable.
 
 
 configure in pyproject.toml:
 
   [tool.echo-python.echo006]
-  names = ["msg", "err"]
+  names = ["err", "tmp"]
+  allow_msg = true
 
 
-`names` replaces the default list. omit the section to keep the
-default of `["msg"]`.
+`names` lists extra names to restrict.
+
+`msg` is restricted by default: ruff hard-codes that name for
+exception bindings, which the author of this library finds
+hateful, so echo-python mutes it out of the box. set
+`allow_msg = true` to unmute it.
