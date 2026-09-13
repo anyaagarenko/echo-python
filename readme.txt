@@ -27,6 +27,8 @@ rules:
             https://github.com/anyaagarenko/echo-python/blob/main/docs/rules/echo-004.txt
   ECHO005 - keyword-only parameters are not sorted
             https://github.com/anyaagarenko/echo-python/blob/main/docs/rules/echo-005.txt
+  ECHO006 - restricted variable names
+            https://github.com/anyaagarenko/echo-python/blob/main/docs/rules/echo-006.txt
 
 
 configure in pyproject.toml:

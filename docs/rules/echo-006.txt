@@ -1,0 +1,22 @@
+ECHO006 - restricted variable names
+
+
+why:
+
+  sometimes a project wants to forbid certain variable names.
+  this rule makes that configurable.
+
+
+configure in pyproject.toml:
+
+  [tool.echo-python.echo006]
+  names = ["err", "tmp"]
+  allow_msg = true
+
+
+`names` lists extra names to restrict.
+
+`msg` is restricted by default: ruff hard-codes that name for
+exception bindings, which the author of this library finds
+hateful, so echo-python mutes it out of the box. set
+`allow_msg = true` to unmute it.

@@ -17,3 +17,4 @@ pub const RULE_MIXED_LIST_SORTED: &str = "ECHO002";
 pub const RULE_NUMBERS_LIST_SORTED: &str = "ECHO003";
 pub const RULE_WORDS_LIST_SORTED: &str = "ECHO004";
 pub const RULE_SORTED_KWONLY_PARAMS: &str = "ECHO005";
+pub const RULE_BANNED_NAMES: &str = "ECHO006";

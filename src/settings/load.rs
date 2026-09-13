@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use serde::Deserialize;
 
 use super::rules::{CheckOptions, LintFileSettings, resolve_enabled};
-use super::{Echo001Settings, Settings};
+use super::{Echo001Settings, Echo006Settings, Settings};
 
 #[derive(Debug, Default, Deserialize)]
 struct PyProject {
@@ -21,6 +21,7 @@ struct ToolTable {
 struct EchoPythonTable {
     lint: Option<LintTable>,
     echo001: Option<Echo001Table>,
+    echo006: Option<Echo006Table>,
 }
 
 #[derive(Debug, Default, Deserialize)]
@@ -38,6 +39,14 @@ struct Echo001Table {
     ignore: Vec<String>,
 }
 
+#[derive(Debug, Default, Deserialize)]
+struct Echo006Table {
+    #[serde(default)]
+    names: Vec<String>,
+    #[serde(default)]
+    allow_msg: bool,
+}
+
 pub(crate) fn load_for_path(path: &Path, options: &CheckOptions) -> Settings {
     let file = find_pyproject(path)
         .and_then(|pyproject| load_file_settings(&pyproject))
@@ -45,6 +54,7 @@ pub(crate) fn load_for_path(path: &Path, options: &CheckOptions) -> Settings {
     Settings {
         enabled: resolve_enabled(&file.lint, options),
         echo001: file.echo001,
+        echo006: file.echo006,
     }
 }
 
@@ -52,6 +62,7 @@ pub(crate) fn load_for_path(path: &Path, options: &CheckOptions) -> Settings {
 struct FileSettings {
     lint: LintFileSettings,
     echo001: Echo001Settings,
+    echo006: Echo006Settings,
 }
 
 fn find_pyproject(path: &Path) -> Option<PathBuf> {
@@ -81,6 +92,7 @@ fn parse_pyproject(source: &str) -> Option<FileSettings> {
     let echo = parsed.tool.and_then(|tool| tool.echo_python)?;
     let lint = echo.lint.unwrap_or_default();
     let echo001 = echo.echo001.unwrap_or_default();
+    let echo006 = echo.echo006.unwrap_or_default();
     Some(FileSettings {
         lint: LintFileSettings {
             select: lint.select,
@@ -90,6 +102,7 @@ fn parse_pyproject(source: &str) -> Option<FileSettings> {
         echo001: Echo001Settings {
             ignore: echo001.ignore.into_iter().collect(),
         },
+        echo006: Echo006Settings::from_config(echo006.names, echo006.allow_msg),
     })
 }
 
@@ -163,5 +176,44 @@ mod tests {
 
         assert!(settings.is_enabled("ECHO003"));
         assert!(settings.is_enabled("ECHO001"));
+    }
+
+    #[test]
+    fn echo006_defaults_to_msg() {
+        let source = "[tool.echo-python.lint]\nselect = [\"ALL\"]\n";
+
+        let settings = parse_pyproject(source).unwrap();
+
+        assert!(settings.echo006.is_restricted("msg"));
+        assert!(!settings.echo006.is_restricted("err"));
+    }
+
+    #[test]
+    fn parses_echo006_names_as_extra() {
+        let source = "[tool.echo-python.echo006]\nnames = [\"err\"]\n";
+
+        let settings = parse_pyproject(source).unwrap();
+
+        assert!(settings.echo006.is_restricted("msg"));
+        assert!(settings.echo006.is_restricted("err"));
+    }
+
+    #[test]
+    fn allow_msg_unmutes_default() {
+        let source = "[tool.echo-python.echo006]\nallow_msg = true\n";
+
+        let settings = parse_pyproject(source).unwrap();
+
+        assert!(!settings.echo006.is_restricted("msg"));
+    }
+
+    #[test]
+    fn allow_msg_keeps_extra_names() {
+        let source = "[tool.echo-python.echo006]\nnames = [\"err\"]\nallow_msg = true\n";
+
+        let settings = parse_pyproject(source).unwrap();
+
+        assert!(!settings.echo006.is_restricted("msg"));
+        assert!(settings.echo006.is_restricted("err"));
     }
 }
