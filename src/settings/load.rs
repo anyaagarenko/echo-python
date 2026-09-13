@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use serde::Deserialize;
 
 use super::rules::{CheckOptions, LintFileSettings, resolve_enabled};
-use super::{Echo001Settings, Echo006Settings, Settings};
+use super::{Echo001Settings, Echo006Settings, Echo007Settings, Settings};
 
 #[derive(Debug, Default, Deserialize)]
 struct PyProject {
@@ -22,6 +22,7 @@ struct EchoPythonTable {
     lint: Option<LintTable>,
     echo001: Option<Echo001Table>,
     echo006: Option<Echo006Table>,
+    echo007: Option<Echo007Table>,
 }
 
 #[derive(Debug, Default, Deserialize)]
@@ -47,6 +48,24 @@ struct Echo006Table {
     allow_msg: bool,
 }
 
+#[derive(Debug, Deserialize)]
+struct Echo007Table {
+    #[serde(default = "default_true")]
+    exclude_tests: bool,
+}
+
+impl Default for Echo007Table {
+    fn default() -> Self {
+        Self {
+            exclude_tests: true,
+        }
+    }
+}
+
+const fn default_true() -> bool {
+    true
+}
+
 pub(crate) fn load_for_path(path: &Path, options: &CheckOptions) -> Settings {
     let file = find_pyproject(path)
         .and_then(|pyproject| load_file_settings(&pyproject))
@@ -55,6 +74,7 @@ pub(crate) fn load_for_path(path: &Path, options: &CheckOptions) -> Settings {
         enabled: resolve_enabled(&file.lint, options),
         echo001: file.echo001,
         echo006: file.echo006,
+        echo007: file.echo007,
     }
 }
 
@@ -63,6 +83,7 @@ struct FileSettings {
     lint: LintFileSettings,
     echo001: Echo001Settings,
     echo006: Echo006Settings,
+    echo007: Echo007Settings,
 }
 
 fn find_pyproject(path: &Path) -> Option<PathBuf> {
@@ -93,6 +114,7 @@ fn parse_pyproject(source: &str) -> Option<FileSettings> {
     let lint = echo.lint.unwrap_or_default();
     let echo001 = echo.echo001.unwrap_or_default();
     let echo006 = echo.echo006.unwrap_or_default();
+    let echo007 = echo.echo007.unwrap_or_default();
     Some(FileSettings {
         lint: LintFileSettings {
             select: lint.select,
@@ -103,6 +125,9 @@ fn parse_pyproject(source: &str) -> Option<FileSettings> {
             ignore: echo001.ignore.into_iter().collect(),
         },
         echo006: Echo006Settings::from_config(echo006.names, echo006.allow_msg),
+        echo007: Echo007Settings {
+            exclude_tests: echo007.exclude_tests,
+        },
     })
 }
 
@@ -215,5 +240,25 @@ mod tests {
 
         assert!(!settings.echo006.is_restricted("msg"));
         assert!(settings.echo006.is_restricted("err"));
+    }
+
+    #[test]
+    fn echo007_defaults_to_exclude_tests() {
+        let source = "[tool.echo-python.lint]\nselect = [\"ALL\"]\n";
+
+        let settings = parse_pyproject(source).unwrap();
+
+        assert!(settings.echo007.exclude_tests);
+        assert!(settings.echo007.skips_function("test_f"));
+    }
+
+    #[test]
+    fn parses_echo007_exclude_tests() {
+        let source = "[tool.echo-python.echo007]\nexclude_tests = false\n";
+
+        let settings = parse_pyproject(source).unwrap();
+
+        assert!(!settings.echo007.exclude_tests);
+        assert!(!settings.echo007.skips_function("test_f"));
     }
 }

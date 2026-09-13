@@ -14,9 +14,21 @@ pub(crate) fn report(
     diagnostics: &mut Vec<Diagnostic>,
 ) {
     let row = locator.line_index(node.start());
+    let column = locator.column_index(node.start());
+    report_at(noqa, path, row, column, code, message, diagnostics);
+}
+
+pub(crate) fn report_at(
+    noqa: &NoqaIndex,
+    path: &std::path::Path,
+    row: usize,
+    column: usize,
+    code: &'static str,
+    message: &str,
+    diagnostics: &mut Vec<Diagnostic>,
+) {
     if noqa.suppresses(row, code) {
         return;
     }
-    let column = locator.column_index(node.start());
     diagnostics.push(Diagnostic::new(path, row, column, code, message));
 }

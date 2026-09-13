@@ -11,7 +11,7 @@ pub(crate) struct Checker<'a> {
     pub(crate) annotation_depth: u32,
     pub(crate) bindings: &'a Bindings,
     pub(crate) diagnostics: &'a mut Vec<Diagnostic>,
-    pub(crate) locator: &'a Locator,
+    pub(crate) locator: &'a Locator<'a>,
     pub(crate) noqa: &'a NoqaIndex,
     pub(crate) path: &'a std::path::Path,
     pub(crate) pytest_rows_depth: u32,

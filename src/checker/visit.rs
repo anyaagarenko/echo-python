@@ -3,8 +3,9 @@ use rustpython_parser::ast::{self, Visitor};
 use super::Checker;
 use crate::RULE_BANNED_NAMES;
 use crate::RULE_ECHO001;
+use crate::RULE_EMPTY_LINES;
 use crate::RULE_SORTED_KWONLY_PARAMS;
-use crate::rules::{banned_names, echo001, sorted_kwonly_params, sorted_literals};
+use crate::rules::{banned_names, echo001, empty_lines, sorted_kwonly_params, sorted_literals};
 
 impl Visitor for Checker<'_> {
     fn visit_expr_list(&mut self, node: ast::ExprList) {
@@ -116,6 +117,16 @@ impl Visitor for Checker<'_> {
                 self.diagnostics,
             );
         }
+        if self.settings.is_enabled(RULE_EMPTY_LINES) {
+            empty_lines::check_function_def(
+                self.locator,
+                self.noqa,
+                self.path,
+                self.settings,
+                &node,
+                self.diagnostics,
+            );
+        }
         self.visit_function_parts(
             *node.args,
             node.body,
@@ -131,6 +142,16 @@ impl Visitor for Checker<'_> {
                 self.locator,
                 self.noqa,
                 self.path,
+                &node,
+                self.diagnostics,
+            );
+        }
+        if self.settings.is_enabled(RULE_EMPTY_LINES) {
+            empty_lines::check_async_function_def(
+                self.locator,
+                self.noqa,
+                self.path,
+                self.settings,
                 &node,
                 self.diagnostics,
             );

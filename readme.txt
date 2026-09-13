@@ -29,6 +29,8 @@ rules:
             https://github.com/anyaagarenko/echo-python/blob/main/docs/rules/echo-005.txt
   ECHO006 - restricted variable names
             https://github.com/anyaagarenko/echo-python/blob/main/docs/rules/echo-006.txt
+  ECHO007 - empty line inside method
+            https://github.com/anyaagarenko/echo-python/blob/main/docs/rules/echo-007.txt
 
 
 configure in pyproject.toml:

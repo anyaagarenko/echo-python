@@ -2,7 +2,7 @@ use rustpython_parser::text_size::TextSize;
 
 use super::Locator;
 
-impl Locator {
+impl Locator<'_> {
     pub(crate) fn line_index(&self, offset: TextSize) -> usize {
         match self.line_starts.binary_search(&offset) {
             Ok(idx) => idx + 1,
@@ -14,6 +14,23 @@ impl Locator {
         let line = self.line_index(offset);
         let line_start = self.line_starts[line - 1];
         (offset - line_start).to_usize() + 1
+    }
+
+    pub(crate) fn line_is_blank(&self, line: usize) -> bool {
+        self.line_text(line).trim().is_empty()
+    }
+
+    pub(crate) fn line_start_offset(&self, line: usize) -> usize {
+        self.line_starts[line - 1].to_usize()
+    }
+
+    fn line_text(&self, line: usize) -> &str {
+        let start = self.line_start_offset(line);
+        let end = self
+            .line_starts
+            .get(line)
+            .map_or(self.source.len(), TextSize::to_usize);
+        self.source[start..end].trim_end_matches(['\r', '\n'])
     }
 }
 
@@ -43,5 +60,12 @@ mod tests {
     fn column_index_on_second_line() {
         let locator = Locator::new("a\nb\n");
         assert_eq!(1, locator.column_index(TextSize::from(2)));
+    }
+
+    #[test]
+    fn blank_line_with_spaces_is_blank() {
+        let locator = Locator::new("a\n  \nb\n");
+        assert!(locator.line_is_blank(2));
+        assert!(!locator.line_is_blank(1));
     }
 }

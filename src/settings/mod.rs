@@ -12,6 +12,7 @@ pub(crate) struct Settings {
     pub(crate) enabled: HashSet<String>,
     pub(crate) echo001: Echo001Settings,
     pub(crate) echo006: Echo006Settings,
+    pub(crate) echo007: Echo007Settings,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -22,6 +23,11 @@ pub(crate) struct Echo001Settings {
 #[derive(Clone, Debug)]
 pub(crate) struct Echo006Settings {
     pub(crate) names: HashSet<String>,
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct Echo007Settings {
+    pub(crate) exclude_tests: bool,
 }
 
 impl Settings {
@@ -55,5 +61,19 @@ impl Echo006Settings {
 
     pub(crate) fn is_restricted(&self, name: &str) -> bool {
         self.names.contains(name)
+    }
+}
+
+impl Default for Echo007Settings {
+    fn default() -> Self {
+        Self {
+            exclude_tests: true,
+        }
+    }
+}
+
+impl Echo007Settings {
+    pub(crate) fn skips_function(&self, name: &str) -> bool {
+        self.exclude_tests && name.starts_with("test_")
     }
 }

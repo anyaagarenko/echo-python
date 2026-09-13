@@ -1,0 +1,33 @@
+ECHO007 - empty line inside method
+
+
+why:
+
+  an empty line inside a method separates “parts,” which means the
+  method does more than one thing. decompose with new methods instead.
+  see https://www.yegor256.com/2014/11/03/empty-line-code-smell.html
+
+
+bad:
+
+  def save(user):
+      user.validate()
+
+      user.persist()
+
+
+good:
+
+  def save(user):
+      user.validate()
+      user.persist()
+
+
+configure in pyproject.toml:
+
+  [tool.echo-python.echo007]
+  exclude_tests = false
+
+
+`exclude_tests` defaults to true and skips functions whose names
+start with `test_`.
