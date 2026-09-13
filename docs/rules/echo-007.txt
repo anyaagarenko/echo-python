@@ -18,3 +18,13 @@ bad:
           if regex.match(line):
               total += 1
       return total
+
+
+configure in pyproject.toml:
+
+  [tool.echo-python.echo007]
+  exclude_tests = false
+
+
+`exclude_tests` defaults to true and skips functions whose names
+start with `test_`.

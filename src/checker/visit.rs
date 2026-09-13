@@ -122,6 +122,7 @@ impl Visitor for Checker<'_> {
                 self.locator,
                 self.noqa,
                 self.path,
+                self.settings,
                 &node,
                 self.diagnostics,
             );
@@ -150,6 +151,7 @@ impl Visitor for Checker<'_> {
                 self.locator,
                 self.noqa,
                 self.path,
+                self.settings,
                 &node,
                 self.diagnostics,
             );
