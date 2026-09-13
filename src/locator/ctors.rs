@@ -2,15 +2,18 @@ use rustpython_parser::text_size::TextSize;
 
 use super::Locator;
 
-impl Locator {
-    pub(crate) fn new(source: &str) -> Self {
+impl<'a> Locator<'a> {
+    pub(crate) fn new(source: &'a str) -> Self {
         let mut line_starts = vec![TextSize::from(0u32)];
         for (idx, ch) in source.char_indices() {
             if ch == '\n' {
                 line_starts.push(TextSize::try_from(idx + 1).expect("source too large"));
             }
         }
-        Self { line_starts }
+        Self {
+            source,
+            line_starts,
+        }
     }
 }
 

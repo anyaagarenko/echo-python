@@ -44,7 +44,7 @@ fn parse_module(path: &Path, source: &str) -> Result<ast::Suite> {
 fn visit_module(
     path: &Path,
     bindings: &Bindings,
-    locator: &Locator,
+    locator: &Locator<'_>,
     noqa: &NoqaIndex,
     settings: &Settings,
     module: ast::Suite,

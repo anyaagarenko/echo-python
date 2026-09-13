@@ -1,0 +1,35 @@
+ECHO007 - empty line inside method
+
+
+why:
+
+  an empty line inside a method separates “parts,” which means the
+  method does more than one thing. decompose with new methods instead.
+  see https://www.yegor256.com/2014/11/03/empty-line-code-smell.html
+
+
+bad:
+
+  def grep(self, regex):
+      lines = self.lines()
+
+      return self.count(lines, regex)
+
+
+good:
+
+  def grep(self, regex):
+      return self.count(self.lines(), regex)
+
+  def count(self, lines, regex):
+      total = 0
+      for line in lines:
+          if regex.match(line):
+              total += 1
+      return total
+
+  def lines(self):
+      return self.file.read().splitlines()
+
+
+blank lines between methods stay allowed.
