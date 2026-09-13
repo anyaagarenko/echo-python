@@ -17,4 +17,5 @@
 - Before every commit, run `make mr`.
 - One action = one commit; push to the open PR after each change.
 - If on `main`, create a short kebab-case branch (one or two words) first.
+- Name commits and pull requests in lowercase.
 - Keep the PR description updated after every commit.
