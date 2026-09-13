@@ -84,6 +84,7 @@ mod tests {
             echo001: Echo001Settings {
                 ignore: ignore.iter().map(|name| (*name).to_string()).collect(),
             },
+            ..Settings::default()
         }
     }
 

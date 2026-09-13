@@ -11,11 +11,17 @@ pub(crate) use load::load_for_path;
 pub(crate) struct Settings {
     pub(crate) enabled: HashSet<String>,
     pub(crate) echo001: Echo001Settings,
+    pub(crate) echo006: Echo006Settings,
 }
 
 #[derive(Clone, Debug, Default)]
 pub(crate) struct Echo001Settings {
     pub(crate) ignore: HashSet<String>,
+}
+
+#[derive(Clone, Debug)]
+pub(crate) struct Echo006Settings {
+    pub(crate) names: HashSet<String>,
 }
 
 impl Settings {
@@ -27,5 +33,19 @@ impl Settings {
 impl Echo001Settings {
     pub(crate) fn ignores(&self, name: &str) -> bool {
         self.ignore.contains(name)
+    }
+}
+
+impl Default for Echo006Settings {
+    fn default() -> Self {
+        Self {
+            names: HashSet::from(["msg".to_string()]),
+        }
+    }
+}
+
+impl Echo006Settings {
+    pub(crate) fn is_restricted(&self, name: &str) -> bool {
+        self.names.contains(name)
     }
 }
