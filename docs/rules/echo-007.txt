@@ -11,25 +11,10 @@ why:
 bad:
 
   def grep(self, regex):
-      lines = self.lines()
+      lines = self.file.read().splitlines()
 
-      return self.count(lines, regex)
-
-
-good:
-
-  def grep(self, regex):
-      return self.count(self.lines(), regex)
-
-  def count(self, lines, regex):
       total = 0
       for line in lines:
           if regex.match(line):
               total += 1
       return total
-
-  def lines(self):
-      return self.file.read().splitlines()
-
-
-blank lines between methods stay allowed.
