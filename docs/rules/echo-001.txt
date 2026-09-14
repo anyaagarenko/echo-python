@@ -31,7 +31,6 @@ skipped when keywords are not possible:
     isinstance(1, int)
     def f(a, b, /): ...
     data.get("key", None)
-    name.replace("a", "b")
 
   *args parameters
     print(1, 2)
