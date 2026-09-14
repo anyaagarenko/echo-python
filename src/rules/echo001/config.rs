@@ -6,8 +6,15 @@ pub(super) fn is_ignored(settings: &Settings, func: &ast::Expr) -> bool {
     let Some(path) = callee_path(func) else {
         return false;
     };
-    let short = path.rsplit('.').next().unwrap_or(path.as_str());
-    settings.echo001.ignores(path.as_str()) || settings.echo001.ignores(short)
+    settings.echo001.ignores(path.as_str()) || settings.echo001.ignores(&short_name(&path))
+}
+
+pub(super) fn callee_name(func: &ast::Expr) -> Option<String> {
+    callee_path(func).map(|path| short_name(&path))
+}
+
+fn short_name(path: &str) -> String {
+    path.rsplit('.').next().unwrap_or(path).to_string()
 }
 
 fn callee_path(func: &ast::Expr) -> Option<String> {
@@ -43,6 +50,14 @@ mod tests {
         assert_eq!(
             Some("obj.append"),
             callee_path(&func_from("obj.append(1, 2)\n")).as_deref()
+        );
+    }
+
+    #[test]
+    fn callee_name_uses_short_method() {
+        assert_eq!(
+            Some("replace"),
+            callee_name(&func_from("name.replace(\"a\", \"b\")\n")).as_deref()
         );
     }
 

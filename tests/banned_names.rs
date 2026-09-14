@@ -39,6 +39,14 @@ fn assignment_msg_is_reported() {
 }
 
 #[test]
+fn assignment_msg_shows_name() {
+    assert_eq!(
+        "variable name `msg` is restricted",
+        lint("msg = 1\n")[0].message
+    );
+}
+
+#[test]
 fn other_assignment_is_clean() {
     assert!(lint("error = 1\n").is_empty());
 }

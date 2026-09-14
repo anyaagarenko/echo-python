@@ -152,6 +152,22 @@ fn open_is_reported() {
 }
 
 #[test]
+fn open_message_shows_callee() {
+    assert_eq!(
+        "use keyword arguments for `open`",
+        lint("open(\"a\", \"r\")\n")[0].message
+    );
+}
+
+#[test]
+fn method_message_shows_callee() {
+    assert_eq!(
+        "use keyword arguments for `m`",
+        lint("obj.m(1, 2)\n")[0].message
+    );
+}
+
+#[test]
 fn print_is_clean() {
     let diags = lint("print(1, 2)\n");
 

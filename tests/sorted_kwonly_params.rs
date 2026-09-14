@@ -19,6 +19,14 @@ fn unsorted_kwonly_are_reported() {
 }
 
 #[test]
+fn unsorted_kwonly_message_shows_names() {
+    assert_eq!(
+        "keyword-only parameters `b, a` are not sorted",
+        lint("def f(*, b, a):\n    pass\n")[0].message
+    );
+}
+
+#[test]
 fn positionals_are_ignored() {
     assert!(lint("def f(b, a):\n    pass\n").is_empty());
 }
