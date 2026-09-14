@@ -71,6 +71,20 @@ fn dict_get_is_clean() {
 }
 
 #[test]
+fn str_replace_is_clean() {
+    let diags = lint("name.replace(\"a\", \"b\")\n");
+
+    assert!(diags.is_empty());
+}
+
+#[test]
+fn literal_replace_is_clean() {
+    let diags = lint("\"hello\".replace(\"a\", \"b\")\n");
+
+    assert!(diags.is_empty());
+}
+
+#[test]
 fn dict_pop_is_clean() {
     let diags = lint("data: dict = {}\ndata.pop(\"key\", None)\n");
 
