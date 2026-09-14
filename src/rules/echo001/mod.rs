@@ -146,6 +146,11 @@ mod tests {
     }
 
     #[test]
+    fn str_replace_is_skipped() {
+        assert!(diagnose_call("name.replace(\"a\", \"b\")\n", &enabled_settings(&[])).is_empty());
+    }
+
+    #[test]
     fn local_posonly_def_is_skipped() {
         let source = "def f(a, b, /):\n    pass\nf(1, 2)\n";
         assert!(diagnose(source, &call_at(source, 1), &enabled_settings(&[])).is_empty());

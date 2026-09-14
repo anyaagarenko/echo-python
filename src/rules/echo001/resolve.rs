@@ -29,7 +29,7 @@ fn method_signature(expr: &ast::ExprCall) -> Option<Signature> {
         return None;
     };
     match attribute.attr.as_str() {
-        "get" | "pop" | "setdefault" => Some(Signature::positional_only(2)),
+        "get" | "pop" | "replace" | "setdefault" => Some(Signature::positional_only(2)),
         "aggregate" | "alias" | "annotate" | "dates" | "datetimes" | "defer" | "difference"
         | "distinct" | "exclude" | "filter" | "intersection" | "only" | "order_by"
         | "prefetch_related" | "select_for_update" | "select_related" | "union" | "update"
