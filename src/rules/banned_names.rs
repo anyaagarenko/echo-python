@@ -99,6 +99,14 @@ mod tests {
     }
 
     #[test]
+    fn restricted_assignment_message_shows_name() {
+        assert_eq!(
+            "variable name `msg` is restricted",
+            diagnose("msg = 1\n", &settings_with(&["msg"]))[0].message
+        );
+    }
+
+    #[test]
     fn other_assignment_is_clean() {
         assert!(diagnose("error = 1\n", &settings_with(&["msg"])).is_empty());
     }

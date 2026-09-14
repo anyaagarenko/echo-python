@@ -29,6 +29,14 @@ fn unsorted_number_list_is_reported() {
 }
 
 #[test]
+fn unsorted_number_list_message_shows_source() {
+    assert_eq!(
+        "numeric literals are not sorted: `[100500, 4911]`",
+        lint("x = [100500, 4911]\n")[0].message
+    );
+}
+
+#[test]
 fn unsorted_number_tuple_is_reported() {
     let diags = lint("x = (2, 1)\n");
 
@@ -64,6 +72,14 @@ fn unsorted_word_list_is_reported() {
 }
 
 #[test]
+fn unsorted_word_list_message_shows_source() {
+    assert_eq!(
+        "word literals are not sorted: `[\"b\", \"a\"]`",
+        lint("x = [\"b\", \"a\"]\n")[0].message
+    );
+}
+
+#[test]
 fn unsorted_name_tuple_is_reported() {
     let diags = lint("x = (b, a)\n");
 
@@ -89,6 +105,14 @@ fn unsorted_mixed_tuple_is_reported() {
     let diags = lint("x = (\"a\", 1)\n");
 
     assert_eq!(RULE_MIXED_LIST_SORTED, diags[0].code);
+}
+
+#[test]
+fn unsorted_mixed_tuple_message_shows_source() {
+    assert_eq!(
+        "mixed literals are not sorted (numbers then words): `(\"a\", 1)`",
+        lint("x = (\"a\", 1)\n")[0].message
+    );
 }
 
 #[test]

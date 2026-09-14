@@ -2,6 +2,7 @@ use rustpython_parser::ast::{self, Ranged};
 use rustpython_parser::text_size::TextSize;
 
 use crate::RULE_EMPTY_LINES;
+use crate::common::quote;
 use crate::common::report::report_at;
 use crate::diagnostic::Diagnostic;
 use crate::locator::Locator;
@@ -19,7 +20,14 @@ pub(crate) fn check_function_def(
     if settings.echo007.skips_function(stmt.name.as_str()) {
         return;
     }
-    check_body(locator, noqa, path, &stmt.body, diagnostics);
+    check_body(
+        locator,
+        noqa,
+        path,
+        stmt.name.as_str(),
+        &stmt.body,
+        diagnostics,
+    );
 }
 
 pub(crate) fn check_async_function_def(
@@ -33,13 +41,21 @@ pub(crate) fn check_async_function_def(
     if settings.echo007.skips_function(stmt.name.as_str()) {
         return;
     }
-    check_body(locator, noqa, path, &stmt.body, diagnostics);
+    check_body(
+        locator,
+        noqa,
+        path,
+        stmt.name.as_str(),
+        &stmt.body,
+        diagnostics,
+    );
 }
 
 fn check_body(
     locator: &Locator,
     noqa: &NoqaIndex,
     path: &std::path::Path,
+    name: &str,
     body: &[ast::Stmt],
     diagnostics: &mut Vec<Diagnostic>,
 ) {
@@ -62,7 +78,7 @@ fn check_body(
             line,
             1,
             RULE_EMPTY_LINES,
-            "empty line inside method",
+            &format!("empty line inside {}", quote::tick(name)),
             diagnostics,
         );
     }
@@ -239,6 +255,14 @@ mod tests {
         assert_eq!(1, diags.len());
         assert_eq!(RULE_EMPTY_LINES, diags[0].code);
         assert_eq!(3, diags[0].row);
+    }
+
+    #[test]
+    fn blank_inside_method_message_shows_name() {
+        assert_eq!(
+            "empty line inside `f`",
+            lint("def f():\n    a = 1\n\n    return a\n")[0].message
+        );
     }
 
     #[test]

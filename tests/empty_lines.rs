@@ -44,6 +44,14 @@ fn blank_inside_method_is_reported() {
 }
 
 #[test]
+fn blank_inside_method_message_shows_name() {
+    assert_eq!(
+        "empty line inside `f`",
+        lint("def f():\n    a = 1\n\n    return a\n")[0].message
+    );
+}
+
+#[test]
 fn blank_after_header_is_reported() {
     assert_eq!(RULE_EMPTY_LINES, lint("def f():\n\n    return 1\n")[0].code);
 }

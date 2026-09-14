@@ -4,6 +4,7 @@ use super::classify::{Kind, classify};
 use crate::RULE_MIXED_LIST_SORTED;
 use crate::RULE_NUMBERS_LIST_SORTED;
 use crate::RULE_WORDS_LIST_SORTED;
+use crate::common::quote;
 use crate::common::report::report;
 use crate::common::sort_key::{
     SortKey, cmp_numbers, cmp_words, is_nondecreasing, keys_match_mixed_order, sort_key,
@@ -30,14 +31,22 @@ pub(crate) fn check<'a, I>(
     let Some(kind) = classify(&keys) else {
         return;
     };
-    let (code, message) = rule_for(kind);
+    let code = code_for(kind);
     if !settings.is_enabled(code) {
         return;
     }
     if is_ordered(&keys, kind) {
         return;
     }
-    report(locator, noqa, path, node, code, message, diagnostics);
+    report(
+        locator,
+        noqa,
+        path,
+        node,
+        code,
+        &message(kind, locator.text(node)),
+        diagnostics,
+    );
 }
 
 fn keys_from_elts<'a, I>(elts: I) -> Option<Vec<SortKey>>
@@ -51,14 +60,23 @@ where
     elts.iter().copied().map(sort_key).collect()
 }
 
-const fn rule_for(kind: Kind) -> (&'static str, &'static str) {
+const fn code_for(kind: Kind) -> &'static str {
     match kind {
-        Kind::Numbers => (RULE_NUMBERS_LIST_SORTED, "numeric literals are not sorted"),
-        Kind::Words => (RULE_WORDS_LIST_SORTED, "word literals are not sorted"),
-        Kind::Mixed => (
-            RULE_MIXED_LIST_SORTED,
-            "mixed literals are not sorted (numbers then words)",
-        ),
+        Kind::Numbers => RULE_NUMBERS_LIST_SORTED,
+        Kind::Words => RULE_WORDS_LIST_SORTED,
+        Kind::Mixed => RULE_MIXED_LIST_SORTED,
+    }
+}
+
+fn message(kind: Kind, source: &str) -> String {
+    format!("{}: {}", title_for(kind), quote::tick(source))
+}
+
+const fn title_for(kind: Kind) -> &'static str {
+    match kind {
+        Kind::Numbers => "numeric literals are not sorted",
+        Kind::Words => "word literals are not sorted",
+        Kind::Mixed => "mixed literals are not sorted (numbers then words)",
     }
 }
 
@@ -103,5 +121,13 @@ mod tests {
         let keys = [SortKey::Int(BigInt::from(1)), SortKey::Word("a".into())];
 
         assert!(is_ordered(&keys, Kind::Mixed));
+    }
+
+    #[test]
+    fn numbers_message_shows_source() {
+        assert_eq!(
+            "numeric literals are not sorted: `[2, 1]`",
+            message(Kind::Numbers, "[2, 1]")
+        );
     }
 }

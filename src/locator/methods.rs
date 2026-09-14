@@ -1,8 +1,17 @@
+use rustpython_parser::ast::Ranged;
 use rustpython_parser::text_size::TextSize;
 
 use super::Locator;
 
 impl Locator<'_> {
+    pub(crate) fn text(&self, node: &impl Ranged) -> &str {
+        self.range(node.start(), node.end())
+    }
+
+    pub(crate) fn range(&self, start: TextSize, end: TextSize) -> &str {
+        &self.source[start.to_usize()..end.to_usize()]
+    }
+
     pub(crate) fn line_index(&self, offset: TextSize) -> usize {
         match self.line_starts.binary_search(&offset) {
             Ok(idx) => idx + 1,
@@ -67,5 +76,11 @@ mod tests {
         let locator = Locator::new("a\n  \nb\n");
         assert!(locator.line_is_blank(2));
         assert!(!locator.line_is_blank(1));
+    }
+
+    #[test]
+    fn range_returns_slice() {
+        let locator = Locator::new("abcde");
+        assert_eq!("bcd", locator.range(TextSize::from(1), TextSize::from(4)));
     }
 }

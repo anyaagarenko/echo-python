@@ -1,6 +1,7 @@
 use rustpython_parser::ast::{self, Ranged};
 
 use crate::RULE_SORTED_KWONLY_PARAMS;
+use crate::common::quote;
 use crate::common::report::report;
 use crate::diagnostic::Diagnostic;
 use crate::locator::Locator;
@@ -44,9 +45,16 @@ fn check_args(
         path,
         node,
         RULE_SORTED_KWONLY_PARAMS,
-        "keyword-only parameters are not sorted",
+        &message(&names),
         diagnostics,
     );
+}
+
+fn message(names: &[&str]) -> String {
+    format!(
+        "keyword-only parameters {} are not sorted",
+        quote::tick(&names.join(", "))
+    )
 }
 
 fn kwonly_names(arguments: &ast::Arguments) -> Vec<&str> {
@@ -103,6 +111,14 @@ mod tests {
         let diags = lint("def f(*, b, a):\n    pass\n");
         assert_eq!(1, diags.len());
         assert_eq!(RULE_SORTED_KWONLY_PARAMS, diags[0].code);
+    }
+
+    #[test]
+    fn unsorted_kwonly_message_shows_names() {
+        assert_eq!(
+            "keyword-only parameters `b, a` are not sorted",
+            lint("def f(*, b, a):\n    pass\n")[0].message
+        );
     }
 
     #[test]

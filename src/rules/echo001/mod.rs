@@ -1,4 +1,5 @@
 mod config;
+mod message;
 mod positionals;
 mod resolve;
 mod signature;
@@ -38,7 +39,7 @@ pub(crate) fn check(
         path,
         expr,
         RULE_ECHO001,
-        "use keyword arguments for multi-arg calls when keywords are possible",
+        &message::for_call(locator, &expr.func),
         diagnostics,
     );
 }
