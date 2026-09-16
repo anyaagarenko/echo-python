@@ -1,3 +1,4 @@
+package = echo-python
 tomls = Cargo.toml mise.toml pyproject.toml rust-toolchain.toml rustfmt.toml
 yamlfiles = $(shell find . \( -name "*.yaml" -o -name "*.yml" \) \
 	! -path "./.git/*" \
@@ -28,8 +29,15 @@ ci: check test
 mr: fmt check test
 
 bump-version:
-	@python3 scripts/bump_version.py $(if $(VERSION),$(VERSION),)
-	cargo update -p echo-python
+	@set -e; \
+	current=$$(sed -nE 's/^version = "(.*)"$$/\1/p' Cargo.toml); \
+	if [ -n "$(VERSION)" ]; then new="$(VERSION)"; else \
+	  new=$$(echo "$$current" | awk -F. '{print $$1"."$$2"."$$3+1}'); \
+	fi; \
+	if [ "$$new" = "$$current" ]; then echo "version is already $$current"; exit 1; fi; \
+	sed -E "s/^version = \"[0-9]+\\.[0-9]+\\.[0-9]+\"/version = \"$$new\"/" Cargo.toml > Cargo.toml.tmp; \
+	mv Cargo.toml.tmp Cargo.toml; \
+	cargo update -p $(package) --precise "$$new"; \
 	cargo check --locked
 	mise exec -- toml-sort $(tomls)
 	@printf '%s\n' "commit Cargo.toml and Cargo.lock, push main, then run the pypi workflow"
