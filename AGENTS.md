@@ -15,7 +15,7 @@
 - In `assert_eq!`, put the expected value first: `assert_eq!(expected, actual)`.
 - Use long-form CLI flags only.
 - Before every commit, run `make mr`.
-- One action = one commit; push to the open PR after each change.
+- One action = one commit; after every commit, push to the remote branch (required—do not leave commits unpushed).
 - If on `main`, create a short kebab-case branch (one or two words) first.
 - Name commits and pull requests in lowercase.
 - Keep the PR description updated after every commit.
