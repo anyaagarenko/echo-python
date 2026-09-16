@@ -17,6 +17,7 @@ jobs:
       - run: make ci
 name: mr
 'on':
+  pull_request: null
   push:
     branches:
       - main
