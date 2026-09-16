@@ -1,0 +1,36 @@
+ECHO008 - empty line between class attributes
+
+
+why:
+
+  class attributes (for example serializer fields) belong in one
+  continuous block. blank lines between them suggest unrelated groups
+  where a nested class or a refactor would be clearer.
+
+
+bad:
+
+  class CreativeReadSerializer(Serializer):
+      id = IntegerField()
+      campaign_id = IntegerField()
+
+      campaign = CampaignSerializer()
+      name = CharField()
+
+
+good:
+
+  class CreativeReadSerializer(Serializer):
+      class Meta:
+          role_hidden_fields = {}
+
+      id = IntegerField()
+      campaign_id = IntegerField()
+      campaign = CampaignSerializer()
+      name = CharField()
+
+
+this rule applies only to consecutive class-level assignments. blank
+lines between methods, between a nested class and attributes, or
+between attributes and methods are allowed.
+
