@@ -29,18 +29,10 @@ ci: check test
 mr: fmt check test
 
 bump-version:
-ifndef version
-	$(error usage: make bump-version version=1.2.3)
-endif
-	@set -e; \
-	current=$$(sed -nE 's/^version = "(.*)"$$/\1/p' Cargo.toml); \
-	if [ "$(version)" = "$$current" ]; then echo "version is already $$current"; exit 1; fi; \
-	sed -E "s/^version = \"[0-9]+\\.[0-9]+\\.[0-9]+\"/version = \"$(version)\"/" Cargo.toml > Cargo.toml.tmp; \
-	mv Cargo.toml.tmp Cargo.toml; \
-	cargo update -p $(package) --precise "$(version)"; \
-	cargo check --locked
+	sed -E "s/^version = \"[0-9]+\\.[0-9]+\\.[0-9]+\"/version = \"$(version)\"/" Cargo.toml > Cargo.toml.tmp
+	mv Cargo.toml.tmp Cargo.toml
+	cargo update -p $(package) --precise "$(version)"
 	mise exec -- toml-sort $(tomls)
-	@printf '%s\n' "commit Cargo.toml and Cargo.lock, push main, then run the pypi workflow"
 
 sort-dotfile:
 	sort --output $(dotfile) $(dotfile)
