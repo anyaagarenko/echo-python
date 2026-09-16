@@ -31,6 +31,8 @@ rules:
             https://github.com/anyaagarenko/echo-python/blob/main/docs/rules/echo-006.txt
   ECHO007 - empty line inside method
             https://github.com/anyaagarenko/echo-python/blob/main/docs/rules/echo-007.txt
+  ECHO008 - empty line between consecutive class or dataclass attributes
+            https://github.com/anyaagarenko/echo-python/blob/main/docs/rules/echo-008.txt
 
 
 configure in pyproject.toml:

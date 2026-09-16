@@ -1,4 +1,5 @@
 pub(crate) mod banned_names;
+pub(crate) mod class_attribute_empty_lines;
 pub(crate) mod echo001;
 pub(crate) mod empty_lines;
 pub(crate) mod sorted_kwonly_params;

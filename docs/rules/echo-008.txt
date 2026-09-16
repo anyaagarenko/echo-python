@@ -1,0 +1,34 @@
+ECHO008 - empty line between class attributes
+
+
+why:
+
+  class attributes belong in one continuous block. blank lines between
+  them suggest unrelated groups where a nested class or a refactor
+  would be clearer.
+
+
+bad:
+
+  @dataclass
+  class Point:
+      x: int
+      y: int
+
+      label: str = ""
+
+
+good:
+
+  @dataclass
+  class Point:
+      x: int
+      y: int
+      label: str = ""
+
+
+this rule applies only to consecutive class-level assignments and
+annotated assignments (including dataclass fields). blank lines between
+methods, between a nested class and attributes, or between attributes
+and methods are allowed.
+
