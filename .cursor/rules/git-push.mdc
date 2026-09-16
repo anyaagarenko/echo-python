@@ -1,0 +1,10 @@
+---
+description: Always push commits to the remote branch in this repo
+alwaysApply: true
+---
+
+# Git push
+
+After every commit on a feature branch, run `git push` (or `git push -u origin <branch>` for a new branch). Do not end a task with local-only commits.
+
+Before committing, run `make mr`. One logical change per commit; push immediately after each commit.
