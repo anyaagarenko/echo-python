@@ -163,4 +163,25 @@ mod tests {
             lint(source)[0].message
         );
     }
+
+    #[test]
+    fn dataclass_fields_are_clean() {
+        let source = "@dataclass\nclass Point:\n    x: int\n    y: int\n";
+        assert!(lint(source).is_empty());
+    }
+
+    #[test]
+    fn dataclass_blank_between_fields_is_reported() {
+        let source = "@dataclass\nclass Point:\n    x: int\n\n    y: int\n";
+        let diags = lint(source);
+        assert_eq!(1, diags.len());
+        assert_eq!(RULE_CLASS_ATTRIBUTE_EMPTY_LINES, diags[0].code);
+        assert_eq!(4, diags[0].row);
+    }
+
+    #[test]
+    fn dataclass_fields_with_defaults_are_checked() {
+        let source = "@dataclass\nclass Box:\n    w: int = 1\n\n    h: int = 2\n";
+        assert_eq!(1, lint(source).len());
+    }
 }

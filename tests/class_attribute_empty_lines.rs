@@ -34,9 +34,24 @@ fn blank_between_methods_is_clean() {
 }
 
 #[test]
-fn serializer_style_body_is_clean() {
-    let source = "class CreativeReadSerializer:\n    class Meta:\n        role_hidden_fields = {}\n\n    id = 1\n    name = 2\n    banner = 3\n    html_banner = 4\n";
+fn blank_after_nested_class_is_clean() {
+    let source = "class Widget:\n    class Config:\n        timeout = 1\n\n    name = \"\"\n    version = 1\n";
     assert!(lint(source).is_empty());
+}
+
+#[test]
+fn dataclass_fields_are_clean() {
+    let source = "@dataclass\nclass Point:\n    x: int\n    y: int\n";
+    assert!(lint(source).is_empty());
+}
+
+#[test]
+fn dataclass_blank_between_fields_is_reported() {
+    let source = "@dataclass\nclass Point:\n    x: int\n\n    y: int\n";
+    let diags = lint(source);
+    assert_eq!(1, diags.len());
+    assert_eq!(RULE_CLASS_ATTRIBUTE_EMPTY_LINES, diags[0].code);
+    assert_eq!(4, diags[0].row);
 }
 
 #[test]
