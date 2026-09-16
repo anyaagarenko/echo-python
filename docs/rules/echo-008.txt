@@ -27,14 +27,6 @@ good:
       label: str = ""
 
 
-  class Widget:
-      class Config:
-          timeout = 1
-
-      name = ""
-      version = 1
-
-
 this rule applies only to consecutive class-level assignments and
 annotated assignments (including dataclass fields). blank lines between
 methods, between a nested class and attributes, or between attributes
