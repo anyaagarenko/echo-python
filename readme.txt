@@ -53,9 +53,3 @@ development:
 
 
 contributions welcome
-
-
-publishing:
-
-  bump version in Cargo.toml on main
-  github → actions → pypi → run workflow (branch: main)

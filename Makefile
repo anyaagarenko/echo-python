@@ -1,3 +1,4 @@
+package = echo-python
 tomls = Cargo.toml mise.toml pyproject.toml rust-toolchain.toml rustfmt.toml
 yamlfiles = $(shell find . \( -name "*.yaml" -o -name "*.yml" \) \
 	! -path "./.git/*" \
@@ -26,6 +27,12 @@ test:
 ci: check test
 
 mr: fmt check test
+
+bump-version:
+	sed -E "s/^version = \"[0-9]+\\.[0-9]+\\.[0-9]+\"/version = \"$(version)\"/" Cargo.toml > Cargo.toml.tmp
+	mv Cargo.toml.tmp Cargo.toml
+	cargo update -p $(package) --precise "$(version)"
+	mise exec -- toml-sort $(tomls)
 
 sort-dotfile:
 	sort --output $(dotfile) $(dotfile)
