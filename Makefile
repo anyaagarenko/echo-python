@@ -27,6 +27,13 @@ ci: check test
 
 mr: fmt check test
 
+bump-version:
+	@python3 scripts/bump_version.py $(if $(VERSION),$(VERSION),)
+	cargo update -p echo-python
+	cargo check --locked
+	mise exec -- toml-sort $(tomls)
+	@printf '%s\n' "commit Cargo.toml and Cargo.lock, push main, then run the pypi workflow"
+
 sort-dotfile:
 	sort --output $(dotfile) $(dotfile)
 	awk "NF" $(dotfile) > $(dotfile).temp && mv $(dotfile).temp $(dotfile)

@@ -57,5 +57,8 @@ contributions welcome
 
 publishing:
 
-  bump version in Cargo.toml on main
+  on main: make bump-version
+  commit Cargo.toml and Cargo.lock, push main
   github → actions → pypi → run workflow (branch: main)
+
+  optional: make bump-version VERSION=1.2.3
